@@ -59,12 +59,11 @@
           <button type="button" class="toggle-btn active" data-value="Male">Male</button>
           <button type="button" class="toggle-btn" data-value="Female">Female</button>
         </div>
-        <span class="err" id="err-gender"></span>
       </div>
 
       <div class="field">
         <label>ID Number</label>
-        <input type="text" id="idNumber" placeholder="1 2000 7 0045629 0 60" maxlength="20"/>
+        <input type="text" id="idNumber" placeholder="1 2000 7 0045629 0 60" maxlength="22"/>
         <span class="err" id="err-idNumber"></span>
       </div>
 
@@ -106,58 +105,119 @@
       </div>
 
       <button class="btn-primary" onclick="goStep(2)">
-        Next: Capture Front ID <span class="btn-arrow">→</span>
+        Next: ID Document <span class="btn-arrow">→</span>
       </button>
     </section>
 
     <!-- ═══════════════════════════════════════════════════
-         STEP 2 — FRONT ID
+         STEP 2 — DOCUMENT TYPE CHOOSER + FRONT / CERT
     ═══════════════════════════════════════════════════ -->
     <section class="step" id="step2">
       <div class="step-header">
-        <div class="step-icon">🪪</div>
-        <h1>Front ID Card</h1>
-        <p>Position your ID card within the frame and capture a clear photo.</p>
+        <div class="step-icon" id="step2Icon">🪪</div>
+        <h1 id="step2Title">Front ID Card</h1>
+        <p id="step2Desc">Position your ID within the frame and capture a clear photo.</p>
       </div>
 
-      <div class="capture-zone" id="captureZoneFront">
-        <div class="camera-frame">
-          <video id="videoFront" autoplay playsinline muted></video>
-          <canvas id="canvasFront" style="display:none"></canvas>
-          <div class="id-overlay">
-            <div class="corner tl"></div><div class="corner tr"></div>
-            <div class="corner bl"></div><div class="corner br"></div>
-            <span class="overlay-label">Place ID here</span>
+      <!-- ── Document type selector (shown once at top of step 2) ── -->
+      <div class="doc-type-card" id="docTypeCard">
+        <p class="doc-type-label">What document do you have?</p>
+        <div class="doc-type-grid">
+          <button class="doc-type-btn active" id="btnPhysicalID" onclick="setDocType('id')">
+            <span class="doc-type-icon">🪪</span>
+            <span class="doc-type-name">National ID Card</span>
+            <span class="doc-type-sub">Physical card (front &amp; back)</span>
+          </button>
+          <button class="doc-type-btn" id="btnCertificate" onclick="setDocType('cert')">
+            <span class="doc-type-icon">📄</span>
+            <span class="doc-type-name">Replacement Certificate</span>
+            <span class="doc-type-sub">Icyemezo Gisimbura Indangamuntu (PDF)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Camera capture zone (ID mode) ── -->
+      <div id="idCaptureZone">
+        <div class="capture-zone" id="captureZoneFront">
+          <div class="camera-frame">
+            <video id="videoFront" autoplay playsinline muted></video>
+            <canvas id="canvasFront" style="display:none"></canvas>
+            <div class="id-overlay">
+              <div class="corner tl"></div><div class="corner tr"></div>
+              <div class="corner bl"></div><div class="corner br"></div>
+              <span class="overlay-label">Place ID here</span>
+            </div>
+          </div>
+          <div class="preview-box" id="previewFront" style="display:none">
+            <img id="imgFront" alt="Front ID preview"/>
+            <button class="btn-retake" onclick="retake('Front')">↺ Retake</button>
           </div>
         </div>
-        <div class="preview-box" id="previewFront" style="display:none">
-          <img id="imgFront" alt="Front ID preview"/>
-          <button class="btn-retake" onclick="retake('Front')">↺ Retake</button>
+
+        <div class="capture-alt">
+          <p>— or upload an image —</p>
+          <label class="upload-label">
+            <input type="file" id="fileFront" accept="image/*" onchange="handleFileUpload('Front', this)"/>
+            <span>📁 Upload Front ID image</span>
+          </label>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-secondary" onclick="goStep(1)">← Back</button>
+          <button class="btn-camera" onclick="capturePhoto('Front')" id="captureBtnFront">
+            <span class="cam-icon">📷</span> Capture
+          </button>
         </div>
       </div>
 
-      <div class="capture-alt">
-        <p>— or upload a file —</p>
-        <label class="upload-label">
-          <input type="file" id="fileFront" accept="image/*,.pdf" onchange="handleFileUpload('Front', this)"/>
-          <span>📁 Upload Front ID / PDF</span>
-        </label>
+      <!-- ── PDF upload zone (Certificate mode) ── -->
+      <div id="certUploadZone" style="display:none">
+        <div class="cert-info-box">
+          <div class="cert-info-icon">ℹ️</div>
+          <div>
+            <strong>Icyemezo Gisimbura Indangamuntu</strong>
+            <p>This is the official ID replacement certificate issued by Irembo when your national ID is lost or pending renewal. Upload the PDF issued to you.</p>
+          </div>
+        </div>
+
+        <div class="cert-upload-area" id="certDropZone">
+          <div class="cert-upload-inner" id="certUploadInner">
+            <span class="cert-upload-icon">📄</span>
+            <p class="cert-upload-title">Upload Replacement Certificate</p>
+            <p class="cert-upload-sub">PDF only · Max 5MB</p>
+            <label class="upload-label cert-btn">
+              <input type="file" id="fileCert" accept="application/pdf" onchange="handleCertUpload(this)"/>
+              <span>Choose PDF file</span>
+            </label>
+          </div>
+          <!-- Shown after upload -->
+          <div class="cert-preview" id="certPreview" style="display:none">
+            <div class="cert-preview-icon">✅</div>
+            <div class="cert-preview-info">
+              <span class="cert-preview-name" id="certFileName">document.pdf</span>
+              <span class="cert-preview-size" id="certFileSize">0 KB</span>
+            </div>
+            <button class="btn-retake-cert" onclick="removeCert()">✕ Remove</button>
+          </div>
+        </div>
+
+        <div class="cert-note">
+          <strong>Note:</strong> The certificate must be valid (not expired) and issued by a recognised Umurenge office. The document number will be verified against the ID number you entered.
+        </div>
+
+        <div class="btn-row" style="margin-top:16px">
+          <button class="btn-secondary" onclick="goStep(1)">← Back</button>
+        </div>
       </div>
 
-      <div class="btn-row">
-        <button class="btn-secondary" onclick="goStep(1)">← Back</button>
-        <button class="btn-camera" onclick="capturePhoto('Front')" id="captureBtnFront">
-          <span class="cam-icon">📷</span> Capture
-        </button>
-      </div>
-      <button class="btn-primary" onclick="goStep(3)" style="margin-top:12px">
-        Next: Capture Back ID <span class="btn-arrow">→</span>
+      <button class="btn-primary" onclick="goStep(3)" style="margin-top:16px" id="step2NextBtn">
+        Next: Back ID <span class="btn-arrow">→</span>
       </button>
       <span class="err center" id="err-front"></span>
     </section>
 
     <!-- ═══════════════════════════════════════════════════
-         STEP 3 — BACK ID
+         STEP 3 — BACK ID  (skipped in cert mode)
     ═══════════════════════════════════════════════════ -->
     <section class="step" id="step3">
       <div class="step-header">
@@ -183,10 +243,10 @@
       </div>
 
       <div class="capture-alt">
-        <p>— or upload a file —</p>
+        <p>— or upload an image —</p>
         <label class="upload-label">
           <input type="file" id="fileBack" accept="image/*" onchange="handleFileUpload('Back', this)"/>
-          <span>📁 Upload Back ID</span>
+          <span>📁 Upload Back ID image</span>
         </label>
       </div>
 
@@ -228,7 +288,7 @@
       </div>
 
       <div class="btn-row">
-        <button class="btn-secondary" onclick="goStep(3)">← Back</button>
+        <button class="btn-secondary" id="step4BackBtn" onclick="goStep(3)">← Back</button>
         <button class="btn-camera" onclick="capturePhoto('Selfie')" id="captureBtnSelfie">
           <span class="cam-icon">🤳</span> Capture
         </button>
@@ -257,9 +317,11 @@
         <div class="review-row"><span>Phone</span><span id="rv-phone">—</span></div>
         <div class="review-row"><span>MSISDN</span><span id="rv-msisdn">—</span></div>
         <div class="review-row"><span>District</span><span id="rv-district">—</span></div>
+        <div class="review-row"><span>Document Type</span><span id="rv-doctype">—</span></div>
       </div>
 
-      <div class="review-images">
+      <!-- ID mode thumbnails -->
+      <div class="review-images" id="rv-id-images">
         <div class="thumb-item">
           <img id="rv-front" alt="Front ID"/>
           <span>Front ID</span>
@@ -270,6 +332,21 @@
         </div>
         <div class="thumb-item">
           <img id="rv-selfie" alt="Selfie"/>
+          <span>Selfie</span>
+        </div>
+      </div>
+
+      <!-- Certificate mode thumbnails -->
+      <div class="review-images" id="rv-cert-images" style="display:none">
+        <div class="thumb-item thumb-wide">
+          <div class="pdf-thumb" id="rv-cert-thumb">
+            <span class="pdf-thumb-icon">📄</span>
+            <span class="pdf-thumb-name" id="rv-cert-name">certificate.pdf</span>
+          </div>
+          <span>Replacement Certificate</span>
+        </div>
+        <div class="thumb-item">
+          <img id="rv-selfie-cert" alt="Selfie"/>
           <span>Selfie</span>
         </div>
       </div>
@@ -287,16 +364,12 @@
          STEP 6 — RESULT
     ═══════════════════════════════════════════════════ -->
     <section class="step" id="step6">
-      <div class="result-container" id="resultContainer">
-        <!-- Populated by JS -->
-      </div>
+      <div class="result-container" id="resultContainer"></div>
     </section>
 
   </main>
 
-  <!-- ── TOAST ───────────────────────────────────────────── -->
   <div class="toast" id="toast"></div>
-
   <script src="app.js"></script>
 </body>
 </html>
