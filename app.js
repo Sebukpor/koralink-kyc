@@ -14,7 +14,7 @@
 // ── CONFIG ────────────────────────────────────────────────────
 const CONFIG = {
   FASTAPI_URL:     "https://sebukpor-koralink-kyc.hf.space/validate",
-  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzlm6mGG8py_JdxvcWAzUXDW3WKj4j8E_ZcIqab60mQtujg-Sx-3UWp--Z0grDggGok/exec",
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyzd4FdPOw7mUpxMLhX3jWPSvNyOPjsHkvNzXqp6K7jqbD03kyDZpSdWvHik1UZm5nq/exec,
   MAX_IMAGE_MB:    5,
   MAX_PDF_MB:      5,
   IMAGE_QUALITY:   0.85,
