@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>KoraLink — Agent KYC Registration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ── HEADER ─────────────────────────────────────────── -->
+  <header class="app-header">
+    <div class="logo">
+      <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+        <rect width="40" height="40" rx="10" fill="#1E6BFF"/>
+        <path d="M10 20 Q20 8 30 20 Q20 32 10 20Z" fill="white" opacity="0.9"/>
+        <circle cx="20" cy="20" r="5" fill="white"/>
+      </svg>
+      <span>KoraLink</span>
+    </div>
+    <div id="stepBadge" class="step-badge">Step 1 of 5</div>
+  </header>
+
+  <!-- ── PROGRESS BAR ────────────────────────────────────── -->
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill" style="width:20%"></div>
+  </div>
+
+  <!-- ── FORM WRAPPER ────────────────────────────────────── -->
+  <main class="form-shell">
+
+    <!-- ═══════════════════════════════════════════════════
+         STEP 1 — AGENT DETAILS
+    ═══════════════════════════════════════════════════ -->
+    <section class="step active" id="step1">
+      <div class="step-header">
+        <div class="step-icon">👤</div>
+        <h1>Agent Details</h1>
+        <p>Enter your personal information to begin registration.</p>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>First Name</label>
+          <input type="text" id="firstName" placeholder="Janvier" autocomplete="given-name"/>
+          <span class="err" id="err-firstName"></span>
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <input type="text" id="lastName" placeholder="Mwnedata" autocomplete="family-name"/>
+          <span class="err" id="err-lastName"></span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Gender</label>
+        <div class="toggle-group" id="genderToggle">
+          <button type="button" class="toggle-btn active" data-value="Male">Male</button>
+          <button type="button" class="toggle-btn" data-value="Female">Female</button>
+        </div>
+        <span class="err" id="err-gender"></span>
+      </div>
+
+      <div class="field">
+        <label>ID Number</label>
+        <input type="text" id="idNumber" placeholder="1 2000 7 0045629 0 60" maxlength="20"/>
+        <span class="err" id="err-idNumber"></span>
+      </div>
+
+      <div class="field">
+        <label>Phone Number</label>
+        <input type="tel" id="phoneNumber" placeholder="07XXXXXXXX" maxlength="10"/>
+        <span class="err" id="err-phoneNumber"></span>
+      </div>
+
+      <div class="field wallet-field">
+        <label>MSISDN (Wallet)</label>
+        <input type="tel" id="msisdn" placeholder="07XXXXXXXX" maxlength="10"/>
+        <p class="hint">ⓘ Number linked to the agent's wallet.</p>
+        <label class="checkbox-label">
+          <input type="checkbox" id="sameAsPhone" checked/>
+          <span class="checkbox-custom"></span>
+          Same as Phone Number
+        </label>
+        <span class="err" id="err-msisdn"></span>
+      </div>
+
+      <div class="field">
+        <label>District</label>
+        <div class="select-wrapper">
+          <select id="district">
+            <option value="">Select District</option>
+            <option>Kicukiro</option>
+            <option>Musanze</option>
+            <option>Nyagatare</option>
+            <option>Karongi</option>
+            <option>Huye</option>
+            <option>Rubavu</option>
+            <option>Kamonyi</option>
+            <option>Rwamagana</option>
+          </select>
+          <span class="select-arrow">▾</span>
+        </div>
+        <span class="err" id="err-district"></span>
+      </div>
+
+      <button class="btn-primary" onclick="goStep(2)">
+        Next: Capture Front ID <span class="btn-arrow">→</span>
+      </button>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         STEP 2 — FRONT ID
+    ═══════════════════════════════════════════════════ -->
+    <section class="step" id="step2">
+      <div class="step-header">
+        <div class="step-icon">🪪</div>
+        <h1>Front ID Card</h1>
+        <p>Position your ID card within the frame and capture a clear photo.</p>
+      </div>
+
+      <div class="capture-zone" id="captureZoneFront">
+        <div class="camera-frame">
+          <video id="videoFront" autoplay playsinline muted></video>
+          <canvas id="canvasFront" style="display:none"></canvas>
+          <div class="id-overlay">
+            <div class="corner tl"></div><div class="corner tr"></div>
+            <div class="corner bl"></div><div class="corner br"></div>
+            <span class="overlay-label">Place ID here</span>
+          </div>
+        </div>
+        <div class="preview-box" id="previewFront" style="display:none">
+          <img id="imgFront" alt="Front ID preview"/>
+          <button class="btn-retake" onclick="retake('Front')">↺ Retake</button>
+        </div>
+      </div>
+
+      <div class="capture-alt">
+        <p>— or upload a file —</p>
+        <label class="upload-label">
+          <input type="file" id="fileFront" accept="image/*,.pdf" onchange="handleFileUpload('Front', this)"/>
+          <span>📁 Upload Front ID / PDF</span>
+        </label>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="goStep(1)">← Back</button>
+        <button class="btn-camera" onclick="capturePhoto('Front')" id="captureBtnFront">
+          <span class="cam-icon">📷</span> Capture
+        </button>
+      </div>
+      <button class="btn-primary" onclick="goStep(3)" style="margin-top:12px">
+        Next: Capture Back ID <span class="btn-arrow">→</span>
+      </button>
+      <span class="err center" id="err-front"></span>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         STEP 3 — BACK ID
+    ═══════════════════════════════════════════════════ -->
+    <section class="step" id="step3">
+      <div class="step-header">
+        <div class="step-icon">🪪</div>
+        <h1>Back ID Card</h1>
+        <p>Flip your ID and capture the back side clearly.</p>
+      </div>
+
+      <div class="capture-zone" id="captureZoneBack">
+        <div class="camera-frame">
+          <video id="videoBack" autoplay playsinline muted></video>
+          <canvas id="canvasBack" style="display:none"></canvas>
+          <div class="id-overlay">
+            <div class="corner tl"></div><div class="corner tr"></div>
+            <div class="corner bl"></div><div class="corner br"></div>
+            <span class="overlay-label">Place ID here</span>
+          </div>
+        </div>
+        <div class="preview-box" id="previewBack" style="display:none">
+          <img id="imgBack" alt="Back ID preview"/>
+          <button class="btn-retake" onclick="retake('Back')">↺ Retake</button>
+        </div>
+      </div>
+
+      <div class="capture-alt">
+        <p>— or upload a file —</p>
+        <label class="upload-label">
+          <input type="file" id="fileBack" accept="image/*" onchange="handleFileUpload('Back', this)"/>
+          <span>📁 Upload Back ID</span>
+        </label>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="goStep(2)">← Back</button>
+        <button class="btn-camera" onclick="capturePhoto('Back')" id="captureBtnBack">
+          <span class="cam-icon">📷</span> Capture
+        </button>
+      </div>
+      <button class="btn-primary" onclick="goStep(4)" style="margin-top:12px">
+        Next: Capture Selfie <span class="btn-arrow">→</span>
+      </button>
+      <span class="err center" id="err-back"></span>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         STEP 4 — SELFIE
+    ═══════════════════════════════════════════════════ -->
+    <section class="step" id="step4">
+      <div class="step-header">
+        <div class="step-icon">🤳</div>
+        <h1>Take a Selfie</h1>
+        <p>Look directly at the camera. Make sure your face is well lit.</p>
+      </div>
+
+      <div class="capture-zone selfie-zone" id="captureZoneSelfie">
+        <div class="camera-frame selfie-frame">
+          <video id="videoSelfie" autoplay playsinline muted></video>
+          <canvas id="canvasSelfie" style="display:none"></canvas>
+          <div class="face-overlay">
+            <div class="face-oval"></div>
+            <span class="overlay-label">Align your face</span>
+          </div>
+        </div>
+        <div class="preview-box" id="previewSelfie" style="display:none">
+          <img id="imgSelfie" alt="Selfie preview" class="selfie-img"/>
+          <button class="btn-retake" onclick="retake('Selfie')">↺ Retake</button>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="goStep(3)">← Back</button>
+        <button class="btn-camera" onclick="capturePhoto('Selfie')" id="captureBtnSelfie">
+          <span class="cam-icon">🤳</span> Capture
+        </button>
+      </div>
+      <button class="btn-primary" onclick="goStep(5)" style="margin-top:12px">
+        Next: Review &amp; Submit <span class="btn-arrow">→</span>
+      </button>
+      <span class="err center" id="err-selfie"></span>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         STEP 5 — REVIEW & SUBMIT
+    ═══════════════════════════════════════════════════ -->
+    <section class="step" id="step5">
+      <div class="step-header">
+        <div class="step-icon">✅</div>
+        <h1>Review &amp; Submit</h1>
+        <p>Confirm your information before sending for AI verification.</p>
+      </div>
+
+      <div class="review-card">
+        <h3>Personal Details</h3>
+        <div class="review-row"><span>Full Name</span><span id="rv-name">—</span></div>
+        <div class="review-row"><span>Gender</span><span id="rv-gender">—</span></div>
+        <div class="review-row"><span>ID Number</span><span id="rv-id">—</span></div>
+        <div class="review-row"><span>Phone</span><span id="rv-phone">—</span></div>
+        <div class="review-row"><span>MSISDN</span><span id="rv-msisdn">—</span></div>
+        <div class="review-row"><span>District</span><span id="rv-district">—</span></div>
+      </div>
+
+      <div class="review-images">
+        <div class="thumb-item">
+          <img id="rv-front" alt="Front ID"/>
+          <span>Front ID</span>
+        </div>
+        <div class="thumb-item">
+          <img id="rv-back" alt="Back ID"/>
+          <span>Back ID</span>
+        </div>
+        <div class="thumb-item">
+          <img id="rv-selfie" alt="Selfie"/>
+          <span>Selfie</span>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="goStep(4)">← Back</button>
+        <button class="btn-primary submit-btn" onclick="submitKYC()" id="submitBtn">
+          <span id="submitLabel">Submit for Verification</span>
+          <span id="submitSpinner" class="spinner hidden"></span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+         STEP 6 — RESULT
+    ═══════════════════════════════════════════════════ -->
+    <section class="step" id="step6">
+      <div class="result-container" id="resultContainer">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── TOAST ───────────────────────────────────────────── -->
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
