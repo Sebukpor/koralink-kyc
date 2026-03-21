@@ -657,3 +657,196 @@ video {
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   DOCUMENT TYPE SELECTOR
+═══════════════════════════════════════════════════════════════ */
+
+.doc-type-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.doc-type-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.doc-type-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.doc-type-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 10px;
+  background: var(--bg3);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color var(--trans), background var(--trans), transform var(--trans);
+  text-align: center;
+}
+.doc-type-btn:hover {
+  background: rgba(30,107,255,0.06);
+  border-color: rgba(30,107,255,0.3);
+}
+.doc-type-btn.active {
+  border-color: var(--blue);
+  background: rgba(30,107,255,0.1);
+  box-shadow: 0 0 0 3px var(--blue-glow);
+}
+.doc-type-icon { font-size: 1.8rem; line-height: 1; }
+.doc-type-name {
+  font-family: var(--font-head);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.doc-type-sub {
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+/* ── CERT INFO BOX ────────────────────────────────────────── */
+.cert-info-box {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: rgba(30,107,255,0.08);
+  border: 1px solid rgba(30,107,255,0.2);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 18px;
+}
+.cert-info-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
+.cert-info-box strong { display: block; font-size: 0.9rem; color: var(--text); margin-bottom: 6px; }
+.cert-info-box p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; margin: 0; }
+
+/* ── CERT UPLOAD AREA ─────────────────────────────────────── */
+.cert-upload-area {
+  background: var(--bg2);
+  border: 2px dashed rgba(255,255,255,0.12);
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+  transition: border-color var(--trans), background var(--trans);
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cert-upload-area.drag-over {
+  border-color: var(--blue);
+  background: rgba(30,107,255,0.06);
+}
+.cert-upload-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 20px;
+  text-align: center;
+}
+.cert-upload-icon { font-size: 2.8rem; }
+.cert-upload-title { font-family: var(--font-head); font-weight: 700; font-size: 0.95rem; color: var(--text); }
+.cert-upload-sub { font-size: 0.78rem; color: var(--muted); }
+.cert-btn { margin-top: 4px; }
+
+/* ── CERT PREVIEW (after upload) ─────────────────────────── */
+.cert-preview {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+  width: 100%;
+}
+.cert-preview-icon { font-size: 2.2rem; flex-shrink: 0; }
+.cert-preview-info {
+  flex: 1;
+  min-width: 0;
+}
+.cert-preview-name {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--green);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cert-preview-size {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.btn-retake-cert {
+  flex-shrink: 0;
+  background: rgba(255,71,87,0.1);
+  border: 1px solid rgba(255,71,87,0.3);
+  border-radius: 20px;
+  color: var(--red);
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--trans);
+}
+.btn-retake-cert:hover { background: rgba(255,71,87,0.2); }
+
+/* ── CERT NOTE ────────────────────────────────────────────── */
+.cert-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  background: var(--bg3);
+  border-left: 3px solid var(--blue);
+  padding: 10px 14px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  line-height: 1.5;
+}
+.cert-note strong { color: var(--text); }
+
+/* ── PDF THUMBNAIL in review ──────────────────────────────── */
+.thumb-wide { grid-column: span 1; }
+
+.pdf-thumb {
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+}
+.pdf-thumb-icon { font-size: 2rem; }
+.pdf-thumb-name {
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-align: center;
+  word-break: break-all;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── cert mode: 2-col review instead of 3 ────────────────── */
+#rv-cert-images {
+  grid-template-columns: 1fr 1fr;
+}
