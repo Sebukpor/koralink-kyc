@@ -1,26 +1,15 @@
 /**
- * KoraLink KYC — app.js  v1.3.2
- * Supports two document modes:
- *   "id"   — Physical National ID card (front photo + back photo)
- *   "cert" — Replacement Certificate / Icyemezo Gisimbura Indangamuntu (single PDF)
- *
- * KEY FIX in v1.3.2:
- *   callAppsScript() was broken in three ways:
- *     1. mode:"no-cors" makes the browser send an opaque request — Apps Script
- *        receives it but e.postData is unreadable, so doPost() always fails silently.
- *     2. The full base64 images were included in the Apps Script payload, making it
- *        potentially 3–8MB — well above what survives a no-cors opaque POST reliably.
- *     3. There was no error feedback if Apps Script failed.
- *
- *   Fix:
- *     • Strip all base64 image data before sending to Apps Script.
- *       Apps Script's only job is to log metadata + Drive URLs; it doesn't need pixels.
- *     • Submit via a hidden <form> with method="POST" and a text/plain encoded body.
- *       This is the standard workaround for cross-origin Apps Script POSTs from a
- *       browser — it triggers the redirect flow that Apps Script expects, without
- *       needing CORS headers.
- *     • Add a visible toast on Apps Script save failure so errors are not silent.
- */
+* KoraLink KYC — app.js  v1.3.3
+* Supports two document modes:
+*   "id"   — Physical National ID card (front photo + back photo)
+*   "cert" — Replacement Certificate / Icyemezo Gisimbura Indangamuntu (single PDF)
+*
+* KEY FIXES in v1.3.3:
+*   • callAppsScript(): Single iframe.onload handler (removed duplicate)
+*   • callAppsScript(): URL-encode payload for safe form submission
+*   • callAppsScript(): Added iframe.onerror + console logging for debugging
+*   • callAppsScript(): Show toast on Apps Script failure for user feedback
+*/
 
 // ── CONFIG ────────────────────────────────────────────────────
 const CONFIG = {
@@ -57,16 +46,13 @@ const STATE = {
 // ══════════════════════════════════════════════════════════════
 //  DOCUMENT TYPE TOGGLE
 // ══════════════════════════════════════════════════════════════
-
 function setDocType(type) {
   STATE.docType = type;
-
   document.getElementById("btnPhysicalID").classList.toggle("active",  type === "id");
   document.getElementById("btnCertificate").classList.toggle("active", type === "cert");
-
   document.getElementById("idCaptureZone").style.display  = type === "id"   ? "block" : "none";
   document.getElementById("certUploadZone").style.display = type === "cert" ? "block" : "none";
-
+  
   if (type === "id") {
     document.getElementById("step2Icon").textContent  = "🪪";
     document.getElementById("step2Title").textContent = "Front ID Card";
@@ -83,18 +69,16 @@ function setDocType(type) {
     STATE.images.front = null;
     STATE.images.back  = null;
   }
-
   clearErrors();
 }
 
 // ══════════════════════════════════════════════════════════════
 //  CERTIFICATE UPLOAD HANDLERS
 // ══════════════════════════════════════════════════════════════
-
 function handleCertUpload(input) {
   const file = input.files[0];
   if (!file) return;
-
+  
   if (file.type !== "application/pdf") {
     showToast("Only PDF files are accepted for the replacement certificate.", "error");
     input.value = "";
@@ -105,19 +89,19 @@ function handleCertUpload(input) {
     input.value = "";
     return;
   }
-
+  
   const reader = new FileReader();
   reader.onload = (e) => {
     STATE.cert.b64  = e.target.result;
     STATE.cert.file = file;
     STATE.cert.name = file.name;
     STATE.cert.size = file.size;
-
+    
     document.getElementById("certUploadInner").style.display = "none";
     document.getElementById("certPreview").style.display     = "flex";
     document.getElementById("certFileName").textContent      = file.name;
     document.getElementById("certFileSize").textContent      = formatBytes(file.size);
-
+    
     setErr("front", "");
     showToast("Certificate uploaded ✓", "success");
   };
@@ -135,7 +119,7 @@ function removeCert() {
 document.addEventListener("DOMContentLoaded", () => {
   const zone = document.getElementById("certDropZone");
   if (!zone) return;
-
+  
   zone.addEventListener("dragover", (e) => {
     e.preventDefault();
     zone.classList.add("drag-over");
@@ -158,47 +142,52 @@ document.addEventListener("DOMContentLoaded", () => {
 // ══════════════════════════════════════════════════════════════
 //  STEP NAVIGATION
 // ══════════════════════════════════════════════════════════════
-
 function goStep(n) {
   if (n > STATE.currentStep) {
     if (!validateCurrentStep()) return;
   }
-
+  
+  // Skip step 3 (back ID) in cert mode
   if (STATE.docType === "cert" && STATE.currentStep === 2 && n === 3) n = 4;
   if (STATE.docType === "cert" && STATE.currentStep === 4 && n === 3) n = 2;
-
+  
+  // Stop camera streams when leaving steps
   const camMap = { 2: "Front", 3: "Back", 4: "Selfie" };
   if (camMap[STATE.currentStep] && camMap[STATE.currentStep] !== camMap[n]) {
     stopStream(camMap[STATE.currentStep]);
   }
-
+  
   STATE.currentStep = n;
+  
+  // Update step UI
   document.querySelectorAll(".step").forEach((s, i) =>
     s.classList.toggle("active", i + 1 === n)
   );
-
+  
+  // Adjust progress for cert mode (4 steps instead of 5)
   const totalVisible = STATE.docType === "cert" ? 4 : 5;
   const displayStep  = STATE.docType === "cert" && n >= 4 ? n - 1 : n;
   document.getElementById("stepBadge").textContent    = `Step ${displayStep} of ${totalVisible}`;
   document.getElementById("progressFill").style.width = `${(displayStep / totalVisible) * 100}%`;
-
+  
+  // Update back button on step 4
   const s4back = document.getElementById("step4BackBtn");
   if (s4back) {
     s4back.setAttribute("onclick", `goStep(${STATE.docType === "cert" ? 2 : 3})`);
   }
-
+  
+  // Start cameras when entering their steps
   if (n === 2 && STATE.docType === "id") startCamera("Front");
   if (n === 3) startCamera("Back");
   if (n === 4) startCamera("Selfie");
   if (n === 5) populateReview();
-
+  
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // ══════════════════════════════════════════════════════════════
 //  VALIDATION PER STEP
 // ══════════════════════════════════════════════════════════════
-
 function validateCurrentStep() {
   clearErrors();
   switch (STATE.currentStep) {
@@ -215,7 +204,7 @@ function validateStep1() {
   const fn = v("firstName"), ln = v("lastName"),
         id = v("idNumber"),  ph = v("phoneNumber"),
         ms = v("msisdn"),    di = v("district");
-
+  
   if (!fn) { setErr("firstName", "First name is required"); ok = false; }
   if (!ln) { setErr("lastName",  "Last name is required");  ok = false; }
   if (!id || id.replace(/\s/g, "").length < 10) {
@@ -228,6 +217,7 @@ function validateStep1() {
     setErr("msisdn", "Enter a valid MSISDN (07XXXXXXXX)"); ok = false;
   }
   if (!di) { setErr("district", "Please select a district"); ok = false; }
+  
   return ok;
 }
 
@@ -265,12 +255,11 @@ function validateStep4() {
 // ══════════════════════════════════════════════════════════════
 //  CAMERA
 // ══════════════════════════════════════════════════════════════
-
 async function startCamera(side) {
   const video = document.getElementById(`video${side}`);
   if (!video) return;
   if (STATE.images[side.toLowerCase()]) return;
-
+  
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
@@ -300,14 +289,22 @@ function stopStream(side) {
 function capturePhoto(side) {
   const video  = document.getElementById(`video${side}`);
   const canvas = document.getElementById(`canvas${side}`);
+  
   if (!video || !video.videoWidth) {
     showToast("Camera not ready. Try uploading instead.", "error");
     return;
   }
+  
   canvas.width  = video.videoWidth;
   canvas.height = video.videoHeight;
   const ctx = canvas.getContext("2d");
-  if (side === "Selfie") { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
+  
+  // Mirror selfie preview
+  if (side === "Selfie") {
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+  }
+  
   ctx.drawImage(video, 0, 0);
   saveImage(side, canvas.toDataURL("image/jpeg", CONFIG.IMAGE_QUALITY));
   stopStream(side);
@@ -333,15 +330,18 @@ function saveImage(side, dataURL) {
 function handleFileUpload(side, input) {
   const file = input.files[0];
   if (!file) return;
+  
   if (file.size > CONFIG.MAX_IMAGE_MB * 1024 * 1024) {
     showToast(`File too large (max ${CONFIG.MAX_IMAGE_MB}MB)`, "error");
     input.value = ""; return;
   }
+  
   const allowed = ["image/jpeg", "image/png", "image/webp"];
   if (!allowed.includes(file.type)) {
     showToast("Only JPG, PNG, or WebP image files are allowed here.", "error");
     input.value = ""; return;
   }
+  
   const reader = new FileReader();
   reader.onload = (e) => saveImage(side, e.target.result);
   reader.readAsDataURL(file);
@@ -350,7 +350,6 @@ function handleFileUpload(side, input) {
 // ══════════════════════════════════════════════════════════════
 //  REVIEW POPULATION
 // ══════════════════════════════════════════════════════════════
-
 function populateReview() {
   document.getElementById("rv-name").textContent     = `${v("firstName")} ${v("lastName")}`;
   document.getElementById("rv-gender").textContent   = STATE.gender;
@@ -360,7 +359,7 @@ function populateReview() {
   document.getElementById("rv-district").textContent = v("district");
   document.getElementById("rv-doctype").textContent  =
     STATE.docType === "cert" ? "Replacement Certificate (PDF)" : "National ID Card";
-
+  
   if (STATE.docType === "id") {
     document.getElementById("rv-id-images").style.display   = "grid";
     document.getElementById("rv-cert-images").style.display = "none";
@@ -378,19 +377,18 @@ function populateReview() {
 // ══════════════════════════════════════════════════════════════
 //  SUBMIT
 // ══════════════════════════════════════════════════════════════
-
 async function submitKYC() {
   const btn     = document.getElementById("submitBtn");
   const label   = document.getElementById("submitLabel");
   const spinner = document.getElementById("submitSpinner");
-
+  
   btn.disabled = true;
   label.textContent = "Validating…";
   spinner.classList.remove("hidden");
-
+  
   try {
     let frontB64, backB64, isPdf;
-
+    
     if (STATE.docType === "cert") {
       frontB64 = stripPrefix(STATE.cert.b64);
       backB64  = CONFIG.PLACEHOLDER_B64;
@@ -400,7 +398,7 @@ async function submitKYC() {
       backB64  = stripPrefix(STATE.images.back);
       isPdf    = false;
     }
-
+    
     // Full payload for FastAPI (needs the actual image bytes for AI validation)
     const fastApiPayload = {
       first_name:   v("firstName"),
@@ -416,32 +414,15 @@ async function submitKYC() {
       selfie:       stripPrefix(STATE.images.selfie),
       front_is_pdf: isPdf,
     };
-
+    
     label.textContent = "AI Verification…";
     const result = await callFastAPI(fastApiPayload);
-
+    
     if (result.status === "approved") {
       label.textContent = "Saving data…";
-
-      // ── KEY FIX ───────────────────────────────────────────────
-      // Apps Script payload intentionally excludes image base64 data.
-      // Reasons:
-      //   1. Apps Script only needs metadata + validation result to write
-      //      the Sheet row. The Drive files are already sent via FastAPI.
-      //      Sending MB of base64 through a browser→Apps Script POST is
-      //      unnecessary and regularly causes silent failures.
-      //   2. Google Apps Script web app POST endpoints have a ~10MB body
-      //      limit and handle large opaque payloads unreliably.
-      //   3. The no-cors fetch workaround only works reliably for small
-      //      text-dominant payloads (< ~100KB).
-      //
-      // NOTE: Apps Script Drive storage still works because front_image
-      // and selfie ARE included below — they are sent as base64 strings
-      // exactly as before. What is stripped is only back_image in cert
-      // mode (it was just the 1×1 placeholder anyway) and nothing else.
-      // The real fix is that we now correctly await the form-based POST
-      // rather than fire-and-forget with no-cors fetch.
-      // ─────────────────────────────────────────────────────────
+      
+      // ── Apps Script payload ─────────────────────────────────
+      // Send full payload including base64 images so Apps Script can save to Drive
       const scriptPayload = {
         first_name:   fastApiPayload.first_name,
         last_name:    fastApiPayload.last_name,
@@ -457,13 +438,14 @@ async function submitKYC() {
         selfie:       fastApiPayload.selfie,        // always included
         validation:   result,
       };
-
+      
       await callAppsScript(scriptPayload);
     }
-
+    
     showResult(result);
+    
   } catch (err) {
-    console.error(err);
+    console.error("submitKYC error:", err);
     showToast("Submission failed: " + err.message, "error");
   } finally {
     btn.disabled = false;
@@ -478,43 +460,36 @@ async function callFastAPI(payload) {
     headers: { "Content-Type": "application/json" },
     body:    JSON.stringify(payload),
   });
+  
   if (!res.ok) throw new Error(`API error ${res.status}: ${await res.text()}`);
   return res.json();
 }
 
 /**
- * callAppsScript — sends KYC metadata to the Google Apps Script web app.
- *
- * WHY NOT fetch() with mode:"no-cors":
- *   fetch() + no-cors produces an "opaque" request. The browser sends the
- *   POST but strips custom headers and forces Content-Type to text/plain.
- *   More critically, Apps Script's doPost(e) receives the request but
- *   e.postData.contents is often empty or malformed for opaque requests
- *   originating from fetch(), causing silent parse failures.
- *
- * THE FIX — hidden <form> POST via an invisible iframe:
- *   A standard HTML form POST to a cross-origin URL works without CORS
- *   because forms predate CORS. Apps Script expects this pattern — it is
- *   the documented way to POST from a browser to a GAS web app when you
- *   cannot set CORS headers. The response lands in a throwaway iframe
- *   (we don't need to read it — success is declared if no network error
- *   fires during submit). A 5-second timeout cleans up the iframe.
- *
- *   The payload is JSON-stringified and placed in a single hidden input
- *   named "payload", matching the change in code.gs doPost() below
- *   which reads: JSON.parse(e.parameter.payload || e.postData.contents)
- *   so it stays backward-compatible with direct API calls.
- */
+* callAppsScript — sends KYC metadata to the Google Apps Script web app.
+*
+* FIXES in v1.3.3:
+*   • URL-encode payload for safe form submission
+*   • Single iframe.onload handler (removed duplicate assignment)
+*   • Added iframe.onerror for network failure detection
+*   • Added console logging for debugging
+*   • Show toast on failure so user knows sync status
+*/
 function callAppsScript(payload) {
   return new Promise((resolve, reject) => {
     try {
+      console.log("=== callAppsScript START ===");
+      console.log("Apps Script URL:", CONFIG.APPS_SCRIPT_URL);
+      console.log("Payload keys:", Object.keys(payload));
+      console.log("Payload size:", JSON.stringify(payload).length, "bytes");
+      
       // Create a throwaway iframe to catch the redirect response
       const iframeName = "gs_iframe_" + Date.now();
       const iframe = document.createElement("iframe");
       iframe.name  = iframeName;
       iframe.style.cssText = "display:none;width:0;height:0;border:0;";
       document.body.appendChild(iframe);
-
+      
       // Create a hidden form targeting the iframe
       const form = document.createElement("form");
       form.method  = "POST";
@@ -522,47 +497,56 @@ function callAppsScript(payload) {
       form.target  = iframeName;
       form.enctype = "application/x-www-form-urlencoded";
       form.style.cssText = "display:none;";
-
+      
       // Single hidden input carrying the JSON payload
+      // KEY FIX: URL-encode the JSON string for safe form transmission
       const input = document.createElement("input");
       input.type  = "hidden";
       input.name  = "payload";
-      input.value = JSON.stringify(payload);
+      input.value = encodeURIComponent(JSON.stringify(payload));
+      
       form.appendChild(input);
-
       document.body.appendChild(form);
-
-      // Clean up after 8 seconds regardless of outcome
+      
+      // Clean up after submission
       const cleanup = () => {
         try { document.body.removeChild(form);   } catch (_) {}
         try { document.body.removeChild(iframe); } catch (_) {}
       };
-
-      // Resolve when the iframe finishes loading (Apps Script redirects on success)
-      iframe.onload = () => {
-        cleanup();
-        resolve();
-      };
-
-      // Fallback resolve after 8s in case onload never fires
+      
+      // Timeout fallback (8 seconds)
       const timeout = setTimeout(() => {
+        console.warn("callAppsScript: timeout reached");
         cleanup();
-        resolve(); // still resolve — don't block the result screen
+        showToast("Data saved locally. Sheet sync timed out.", "error");
+        resolve(); // Don't block UI
       }, 8000);
-
+      
+      // SINGLE onload handler (FIXED: removed duplicate)
       iframe.onload = () => {
+        console.log("callAppsScript: iframe loaded (Apps Script responded)");
         clearTimeout(timeout);
         cleanup();
         resolve();
       };
-
+      
+      // Error handler for network failures
+      iframe.onerror = (err) => {
+        console.error("callAppsScript: iframe error:", err);
+        clearTimeout(timeout);
+        cleanup();
+        showToast("Data saved locally. Sheet sync failed.", "error");
+        resolve(); // Don't block UI
+      };
+      
+      // Actually submit the form
+      console.log("callAppsScript: submitting form to", CONFIG.APPS_SCRIPT_URL);
       form.submit();
-
+      
     } catch (err) {
-      console.error("callAppsScript error:", err);
-      // Don't reject — a save failure should not block showing the result
-      showToast("Data saved locally. Sheet sync may retry.", "error");
-      resolve();
+      console.error("callAppsScript setup error:", err);
+      showToast("Data saved locally. Sheet sync error.", "error");
+      resolve(); // Don't block UI
     }
   });
 }
@@ -570,12 +554,12 @@ function callAppsScript(payload) {
 // ══════════════════════════════════════════════════════════════
 //  RESULT SCREEN
 // ══════════════════════════════════════════════════════════════
-
 function showResult(result) {
   goStepDirect(6);
+  
   const ok  = result.status === "approved";
   const pct = Math.round((result.score || 0) * 100);
-
+  
   let issuesHTML = "";
   if (!ok && result.issues?.length) {
     issuesHTML = `
@@ -584,7 +568,7 @@ function showResult(result) {
         <ul>${result.issues.map(i => `<li>${i}</li>`).join("")}</ul>
       </div>`;
   }
-
+  
   document.getElementById("resultContainer").innerHTML = `
     <div class="result-icon">${ok ? "✅" : "❌"}</div>
     <div class="result-title ${ok ? "approved" : "rejected"}">
@@ -595,8 +579,8 @@ function showResult(result) {
     </div>
     ${issuesHTML}
     <div class="result-meta">
-      ${ok
-        ? "Your data has been securely saved. You will receive confirmation shortly."
+      ${ok 
+        ? "Your data has been securely saved. You will receive confirmation shortly." 
         : "Please correct the issues above and try again."}
     </div>
     <div class="result-actions">
@@ -621,16 +605,16 @@ function restartFull() {
   STATE.cert    = { file: null, b64: null, name: "", size: 0 };
   STATE.gender  = "Male";
   STATE.docType = "id";
-
+  
   document.querySelectorAll("input[type='text'], input[type='tel']")
     .forEach(i => (i.value = ""));
   document.getElementById("district").value      = "";
   document.getElementById("sameAsPhone").checked = true;
-
+  
   document.querySelectorAll(".toggle-btn").forEach(b =>
     b.classList.toggle("active", b.dataset.value === "Male")
   );
-
+  
   setDocType("id");
   removeCert();
   goStep(1);
@@ -639,28 +623,32 @@ function restartFull() {
 // ══════════════════════════════════════════════════════════════
 //  HELPERS
 // ══════════════════════════════════════════════════════════════
-
 function v(id) {
   const el = document.getElementById(id);
   return el ? el.value.trim() : "";
 }
+
 function setErr(field, msg) {
   const el = document.getElementById(`err-${field}`);
   if (el) el.textContent = msg;
 }
+
 function clearErrors() {
   document.querySelectorAll(".err").forEach(e => (e.textContent = ""));
 }
+
 function stripPrefix(dataURL) {
   if (!dataURL) return null;
   return dataURL.includes(",") ? dataURL.split(",")[1] : dataURL;
 }
+
 function showToast(msg, type = "") {
   const t = document.getElementById("toast");
   t.textContent = msg;
   t.className   = "toast show" + (type ? ` ${type}` : "");
   setTimeout(() => t.classList.remove("show"), 3200);
 }
+
 function formatBytes(bytes) {
   if (bytes < 1024) return bytes + " B";
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
@@ -670,7 +658,6 @@ function formatBytes(bytes) {
 // ══════════════════════════════════════════════════════════════
 //  EVENT LISTENERS
 // ══════════════════════════════════════════════════════════════
-
 document.addEventListener("DOMContentLoaded", () => {
   // Gender toggle
   document.querySelectorAll(".toggle-btn").forEach(btn => {
@@ -680,12 +667,12 @@ document.addEventListener("DOMContentLoaded", () => {
       STATE.gender = btn.dataset.value;
     });
   });
-
+  
   // Same-as-phone checkbox
   const sameCheck   = document.getElementById("sameAsPhone");
   const msisdnInput = document.getElementById("msisdn");
   const phoneInput  = document.getElementById("phoneNumber");
-
+  
   function syncMsisdn() {
     if (sameCheck.checked) {
       msisdnInput.value    = phoneInput.value;
@@ -694,10 +681,11 @@ document.addEventListener("DOMContentLoaded", () => {
       msisdnInput.disabled = false;
     }
   }
+  
   sameCheck.addEventListener("change", syncMsisdn);
   phoneInput.addEventListener("input",  syncMsisdn);
   syncMsisdn();
-
+  
   // ID number — digits + spaces only
   document.getElementById("idNumber").addEventListener("input", function () {
     this.value = this.value.replace(/[^\d\s]/g, "");
