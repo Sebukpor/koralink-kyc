@@ -33,6 +33,41 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ── HEADER ──────────────────────────────────────────────── */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: rgba(13,15,20,0.9);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.logo-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
+  max-width: 100%;
+  height: auto;
+  filter: drop-shadow(0 0 8px rgba(30,107,255,0.3));
+}
 
 .step-badge {
   font-size: 0.78rem;
@@ -72,94 +107,6 @@ body {
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ── HEADER & LOGO (Dark Theme Compatible) ─────────────────── */
-
-/* Keep your existing .app-header - DO NOT DUPLICATE */
-/* Your current header style is correct: */
-/*
-.app-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 20px;
-  background: rgba(13,15,20,0.9);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-}
-*/
-
-/* Update .logo to support image - REPLACE your current .logo */
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--font-head);
-  font-weight: 700;
-  font-size: 1.15rem;
-  letter-spacing: -0.02em;
-  color: var(--text);
-  text-decoration: none;  /* Added for link support */
-}
-
-/* ADD these new styles for logo image */
-.logo-img {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  display: block;
-  max-width: 100%;
-  height: auto;
-  /* Optional: glow effect matching theme */
-  filter: drop-shadow(0 0 8px rgba(30,107,255,0.3));
-}
-
-/* Optional: Larger logo on desktop */
-@media (min-width: 768px) {
-  .logo-img {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .logo {
-    font-size: 1.35rem;
-  }
-}
-
-/* High-DPI optimization */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .logo-img {
-    image-rendering: -webkit-optimize-contrast;
-  }
-}
-
-/* Keep your existing .step-badge - it's already correct */
-/*
-.step-badge {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--blue);
-  background: rgba(30,107,255,0.12);
-  border: 1px solid rgba(30,107,255,0.3);
-  padding: 4px 12px;
-  border-radius: 20px;
-  letter-spacing: 0.03em;
-}
-*/
-
-/* Step badge styling (if not already present) */
-.step-badge {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #6b7280;
-  background: #f3f4f6;
-  padding: 6px 12px;
-  border-radius: 20px;
 }
 
 /* ── STEP HEADER ──────────────────────────────────────────── */
@@ -715,6 +662,23 @@ video {
 @media (max-width: 380px) {
   .field-row { grid-template-columns: 1fr; }
   .step-header h1 { font-size: 1.35rem; }
+}
+
+@media (min-width: 768px) {
+  .logo-img {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .logo {
+    font-size: 1.35rem;
+  }
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .logo-img {
+    image-rendering: -webkit-optimize-contrast;
+  }
 }
 
 /* ── SCROLLBAR ────────────────────────────────────────────── */
