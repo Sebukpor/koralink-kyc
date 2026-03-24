@@ -1,369 +1,510 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>KoraLink — Agent KYC Registration</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KoraLink — Agent KYC Registration</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Smart Capture Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js" async></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js" async></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" async></script>
 </head>
 <body>
-  <!-- ── HEADER ─────────────────────────────────────────── -->
-<header class="app-header">
-  <div class="logo">
-    <img src="images/koralink.png" alt="KoraLink" class="logo-img" width="70" height="65" />
-  </div>
-  <div id="stepBadge" class="step-badge">Step 1 of 5</div>
-</header>
-  <!-- ── PROGRESS BAR ────────────────────────────────────── -->
-  <div class="progress-track">
-    <div class="progress-fill" id="progressFill" style="width:20%"></div>
-  </div>
+    <!-- Header -->
+    <header class="app-header">
+        <a href="#" class="logo">
+            <img src="images/koralink.png" alt="KoraLink" class="logo-img">
+        </a>
+        <div class="step-badge" id="stepBadge">Step 1 of 5</div>
+    </header>
 
-  <!-- ── FORM WRAPPER ────────────────────────────────────── -->
-  <main class="form-shell">
+    <!-- Progress Bar -->
+    <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width: 20%"></div>
+    </div>
 
-    <!-- ═══════════════════════════════════════════════════
-         STEP 1 — AGENT DETAILS
-    ═══════════════════════════════════════════════════ -->
-    <section class="step active" id="step1">
-      <div class="step-header">
-        <div class="step-icon">👤</div>
-        <h1>Agent Details</h1>
-        <p>Enter your personal information to begin registration.</p>
-      </div>
-
-      <div class="field-row">
-        <div class="field">
-          <label>First Name</label>
-          <input type="text" id="firstName" placeholder="Janvier" autocomplete="given-name"/>
-          <span class="err" id="err-firstName"></span>
-        </div>
-        <div class="field">
-          <label>Last Name</label>
-          <input type="text" id="lastName" placeholder="Mwnedata" autocomplete="family-name"/>
-          <span class="err" id="err-lastName"></span>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Gender</label>
-        <div class="toggle-group" id="genderToggle">
-          <button type="button" class="toggle-btn active" data-value="Male">Male</button>
-          <button type="button" class="toggle-btn" data-value="Female">Female</button>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>ID Number</label>
-        <input type="text" id="idNumber" placeholder="1 2000 7 0045629 0 60" maxlength="16"/>
-        <span class="err" id="err-idNumber"></span>
-      </div>
-
-      <div class="field">
-        <label>Phone Number</label>
-        <input type="tel" id="phoneNumber" placeholder="07XXXXXXXX" maxlength="10"/>
-        <span class="err" id="err-phoneNumber"></span>
-      </div>
-
-      <div class="field wallet-field">
-        <label>MSISDN (Wallet)</label>
-        <input type="tel" id="msisdn" placeholder="07XXXXXXXX" maxlength="10"/>
-        <p class="hint">ⓘ Number linked to the agent's wallet.</p>
-        <label class="checkbox-label">
-          <input type="checkbox" id="sameAsPhone" checked/>
-          <span class="checkbox-custom"></span>
-          Same as Phone Number
-        </label>
-        <span class="err" id="err-msisdn"></span>
-      </div>
-
-      <div class="field">
-        <label>District</label>
-        <div class="select-wrapper">
-          <select id="district">
-            <option value="">Select District</option>
-            <option>Kicukiro</option>
-            <option>Musanze</option>
-            <option>Nyagatare</option>
-            <option>Karongi</option>
-            <option>Huye</option>
-            <option>Rubavu</option>
-            <option>Kamonyi</option>
-            <option>Rwamagana</option>
-          </select>
-          <span class="select-arrow">▾</span>
-        </div>
-        <span class="err" id="err-district"></span>
-      </div>
-
-      <button class="btn-primary" onclick="goStep(2)">
-        Next: ID Document <span class="btn-arrow">→</span>
-      </button>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════════
-         STEP 2 — DOCUMENT TYPE CHOOSER + FRONT / CERT
-    ═══════════════════════════════════════════════════ -->
-    <section class="step" id="step2">
-      <div class="step-header">
-        <div class="step-icon" id="step2Icon">🪪</div>
-        <h1 id="step2Title">Front ID Card</h1>
-        <p id="step2Desc">Position your ID within the frame and capture a clear photo.</p>
-      </div>
-
-      <!-- ── Document type selector (shown once at top of step 2) ── -->
-      <div class="doc-type-card" id="docTypeCard">
-        <p class="doc-type-label">What document do you have?</p>
-        <div class="doc-type-grid">
-          <button class="doc-type-btn active" id="btnPhysicalID" onclick="setDocType('id')">
-            <span class="doc-type-icon">🪪</span>
-            <span class="doc-type-name">National ID Card</span>
-            <span class="doc-type-sub">Physical card (front &amp; back)</span>
-          </button>
-          <button class="doc-type-btn" id="btnCertificate" onclick="setDocType('cert')">
-            <span class="doc-type-icon">📄</span>
-            <span class="doc-type-name">Replacement Certificate</span>
-            <span class="doc-type-sub">Icyemezo Gisimbura Indangamuntu (PDF)</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- ── Camera capture zone (ID mode) ── -->
-      <div id="idCaptureZone">
-        <div class="capture-zone" id="captureZoneFront">
-          <div class="camera-frame">
-            <video id="videoFront" autoplay playsinline muted></video>
-            <canvas id="canvasFront" style="display:none"></canvas>
-            <div class="id-overlay">
-              <div class="corner tl"></div><div class="corner tr"></div>
-              <div class="corner bl"></div><div class="corner br"></div>
-              <span class="overlay-label">Place ID here</span>
+    <!-- Form Container -->
+    <main class="form-shell">
+        
+        <!-- STEP 1: Agent Details -->
+        <section class="step active" id="step1">
+            <div class="step-header">
+                <span class="step-icon">👤</span>
+                <h1>Agent Details</h1>
+                <p>Enter your personal information to begin registration.</p>
             </div>
-          </div>
-          <div class="preview-box" id="previewFront" style="display:none">
-            <img id="imgFront" alt="Front ID preview"/>
-            <button class="btn-retake" onclick="retake('Front')">↺ Retake</button>
-          </div>
-        </div>
 
-        <div class="capture-alt">
-          <p>— or upload an image —</p>
-          <label class="upload-label">
-            <input type="file" id="fileFront" accept="image/*" onchange="handleFileUpload('Front', this)"/>
-            <span>📁 Upload Front ID image</span>
-          </label>
-        </div>
-
-        <div class="btn-row">
-          <button class="btn-secondary" onclick="goStep(1)">← Back</button>
-          <button class="btn-camera" onclick="capturePhoto('Front')" id="captureBtnFront">
-            <span class="cam-icon">📷</span> Capture
-          </button>
-        </div>
-      </div>
-
-      <!-- ── PDF upload zone (Certificate mode) ── -->
-      <div id="certUploadZone" style="display:none">
-        <div class="cert-info-box">
-          <div class="cert-info-icon">ℹ️</div>
-          <div>
-            <strong>Icyemezo Gisimbura Indangamuntu</strong>
-            <p>This is the official ID replacement certificate issued by Irembo when your national ID is lost or pending renewal. Upload the PDF issued to you.</p>
-          </div>
-        </div>
-
-        <div class="cert-upload-area" id="certDropZone">
-          <div class="cert-upload-inner" id="certUploadInner">
-            <span class="cert-upload-icon">📄</span>
-            <p class="cert-upload-title">Upload Replacement Certificate</p>
-            <p class="cert-upload-sub">PDF only · Max 5MB</p>
-            <label class="upload-label cert-btn">
-              <input type="file" id="fileCert" accept="application/pdf" onchange="handleCertUpload(this)"/>
-              <span>Choose PDF file</span>
-            </label>
-          </div>
-          <!-- Shown after upload -->
-          <div class="cert-preview" id="certPreview" style="display:none">
-            <div class="cert-preview-icon">✅</div>
-            <div class="cert-preview-info">
-              <span class="cert-preview-name" id="certFileName">document.pdf</span>
-              <span class="cert-preview-size" id="certFileSize">0 KB</span>
+            <div class="field-row">
+                <div class="field">
+                    <label for="firstName">First Name</label>
+                    <input type="text" id="firstName" placeholder="Enter first name" autocomplete="given-name">
+                    <span class="err" id="err-firstName"></span>
+                </div>
+                <div class="field">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" id="lastName" placeholder="Enter last name" autocomplete="family-name">
+                    <span class="err" id="err-lastName"></span>
+                </div>
             </div>
-            <button class="btn-retake-cert" onclick="removeCert()">✕ Remove</button>
-          </div>
-        </div>
 
-        <div class="cert-note">
-          <strong>Note:</strong> The certificate must be valid (not expired) and issued by a recognised Umurenge office. The document number will be verified against the ID number you entered.
-        </div>
+            <div class="field">
+                <label>Gender</label>
+                <div class="toggle-group">
+                    <button type="button" class="toggle-btn" data-value="Male">Male</button>
+                    <button type="button" class="toggle-btn" data-value="Female">Female</button>
+                </div>
+                <span class="err" id="err-gender"></span>
+            </div>
 
-        <div class="btn-row" style="margin-top:16px">
-          <button class="btn-secondary" onclick="goStep(1)">← Back</button>
-        </div>
-      </div>
+            <div class="field">
+                <label for="idNumber">ID Number</label>
+                <input type="tel" id="idNumber" placeholder="Enter ID number" maxlength="20" autocomplete="off">
+                <span class="err" id="err-idNumber"></span>
+            </div>
 
-      <button class="btn-primary" onclick="goStep(3)" style="margin-top:16px" id="step2NextBtn">
-        Next: Back ID <span class="btn-arrow">→</span>
-      </button>
-      <span class="err center" id="err-front"></span>
-    </section>
+            <div class="field">
+                <label for="phoneNumber">Phone Number</label>
+                <input type="tel" id="phoneNumber" placeholder="07XXXXXXXX" maxlength="10" autocomplete="tel">
+                <span class="err" id="err-phoneNumber"></span>
+            </div>
 
-    <!-- ═══════════════════════════════════════════════════
-         STEP 3 — BACK ID  (skipped in cert mode)
-    ═══════════════════════════════════════════════════ -->
-    <section class="step" id="step3">
-      <div class="step-header">
-        <div class="step-icon">🪪</div>
-        <h1>Back ID Card</h1>
-        <p>Flip your ID and capture the back side clearly.</p>
-      </div>
+            <div class="wallet-field">
+                <label for="msisdn">MSISDN (Wallet)</label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="sameAsPhone" checked>
+                    <span class="checkbox-custom"></span>
+                    <span>Same as Phone Number</span>
+                </label>
+                <input type="tel" id="msisdn" placeholder="07XXXXXXXX" maxlength="10" disabled>
+                <p class="hint">ⓘ Number linked to the agent's wallet.</p>
+                <span class="err" id="err-msisdn"></span>
+            </div>
 
-      <div class="capture-zone" id="captureZoneBack">
-        <div class="camera-frame">
-          <video id="videoBack" autoplay playsinline muted></video>
-          <canvas id="canvasBack" style="display:none"></canvas>
-          <div class="id-overlay">
-            <div class="corner tl"></div><div class="corner tr"></div>
-            <div class="corner bl"></div><div class="corner br"></div>
-            <span class="overlay-label">Place ID here</span>
-          </div>
-        </div>
-        <div class="preview-box" id="previewBack" style="display:none">
-          <img id="imgBack" alt="Back ID preview"/>
-          <button class="btn-retake" onclick="retake('Back')">↺ Retake</button>
-        </div>
-      </div>
+            <div class="field">
+                <label for="district">District</label>
+                <div class="select-wrapper">
+                    <select id="district">
+                        <option value="">Select District</option>
+                        <option value="Kicukiro">Kicukiro</option>
+                        <option value="Musanze">Musanze</option>
+                        <option value="Nyagatare">Nyagatare</option>
+                        <option value="Karongi">Karongi</option>
+                        <option value="Huye">Huye</option>
+                        <option value="Rubavu">Rubavu</option>
+                        <option value="Kamonyi">Kamonyi</option>
+                        <option value="Rwamagana">Rwamagana</option>
+                    </select>
+                    <span class="select-arrow">▾</span>
+                </div>
+                <span class="err" id="err-district"></span>
+            </div>
 
-      <div class="capture-alt">
-        <p>— or upload an image —</p>
-        <label class="upload-label">
-          <input type="file" id="fileBack" accept="image/*" onchange="handleFileUpload('Back', this)"/>
-          <span>📁 Upload Back ID image</span>
-        </label>
-      </div>
+            <button class="btn-primary" onclick="goStep(2)">
+                Next: ID Document <span class="btn-arrow">→</span>
+            </button>
+        </section>
 
-      <div class="btn-row">
-        <button class="btn-secondary" onclick="goStep(2)">← Back</button>
-        <button class="btn-camera" onclick="capturePhoto('Back')" id="captureBtnBack">
-          <span class="cam-icon">📷</span> Capture
-        </button>
-      </div>
-      <button class="btn-primary" onclick="goStep(4)" style="margin-top:12px">
-        Next: Capture Selfie <span class="btn-arrow">→</span>
-      </button>
-      <span class="err center" id="err-back"></span>
-    </section>
+        <!-- STEP 2: Front ID Card -->
+        <section class="step" id="step2">
+            <div class="step-header">
+                <span class="step-icon" id="step2Icon">🪪</span>
+                <h1 id="step2Title">Front ID Card</h1>
+                <p id="step2Desc">Position your ID within the frame and capture a clear photo.</p>
+            </div>
 
-    <!-- ═══════════════════════════════════════════════════
-         STEP 4 — SELFIE
-    ═══════════════════════════════════════════════════ -->
-    <section class="step" id="step4">
-      <div class="step-header">
-        <div class="step-icon">🤳</div>
-        <h1>Take a Selfie</h1>
-        <p>Look directly at the camera. Make sure your face is well lit.</p>
-      </div>
+            <!-- Document Type Selector -->
+            <div class="doc-type-card">
+                <label class="doc-type-label">What document do you have?</label>
+                <div class="doc-type-grid">
+                    <div class="doc-type-btn active" id="btnPhysicalID" onclick="setDocType('id')">
+                        <span class="doc-type-icon">🪪</span>
+                        <span class="doc-type-name">National ID Card</span>
+                        <span class="doc-type-sub">Physical card (front & back)</span>
+                    </div>
+                    <div class="doc-type-btn" id="btnCertificate" onclick="setDocType('cert')">
+                        <span class="doc-type-icon">📄</span>
+                        <span class="doc-type-name">Replacement Certificate</span>
+                        <span class="doc-type-sub">Icyemezo Gisimbura Indangamuntu (PDF)</span>
+                    </div>
+                </div>
+            </div>
 
-      <div class="capture-zone selfie-zone" id="captureZoneSelfie">
-        <div class="camera-frame selfie-frame">
-          <video id="videoSelfie" autoplay playsinline muted></video>
-          <canvas id="canvasSelfie" style="display:none"></canvas>
-          <div class="face-overlay">
-            <div class="face-oval"></div>
-            <span class="overlay-label">Align your face</span>
-          </div>
-        </div>
-        <div class="preview-box" id="previewSelfie" style="display:none">
-          <img id="imgSelfie" alt="Selfie preview" class="selfie-img"/>
-          <button class="btn-retake" onclick="retake('Selfie')">↺ Retake</button>
-        </div>
-      </div>
+            <!-- ID Capture Zone -->
+            <div id="idCaptureZone">
+                <div class="capture-zone">
+                    <div class="camera-frame" id="cameraFrameFront">
+                        <video id="videoFront" autoplay playsinline muted></video>
+                        <canvas id="canvasFront" style="display:none"></canvas>
+                        
+                        <!-- Smart ID Overlay -->
+                        <div class="id-smart-overlay" id="captureZoneFront">
+                            <div class="id-overlay-shadow"></div>
+                            <div class="id-overlay-box">
+                                <div class="id-corner tl"></div>
+                                <div class="id-corner tr"></div>
+                                <div class="id-corner bl"></div>
+                                <div class="id-corner br"></div>
+                            </div>
+                        </div>
 
-      <div class="btn-row">
-        <button class="btn-secondary" id="step4BackBtn" onclick="goStep(3)">← Back</button>
-        <button class="btn-camera" onclick="capturePhoto('Selfie')" id="captureBtnSelfie">
-          <span class="cam-icon">🤳</span> Capture
-        </button>
-      </div>
-      <button class="btn-primary" onclick="goStep(5)" style="margin-top:12px">
-        Next: Review &amp; Submit <span class="btn-arrow">→</span>
-      </button>
-      <span class="err center" id="err-selfie"></span>
-    </section>
+                        <!-- Feedback Label -->
+                        <div class="capture-feedback feedback-orange" id="feedbackFront">Align ID within the frame…</div>
 
-    <!-- ═══════════════════════════════════════════════════
-         STEP 5 — REVIEW & SUBMIT
-    ═══════════════════════════════════════════════════ -->
-    <section class="step" id="step5">
-      <div class="step-header">
-        <div class="step-icon">✅</div>
-        <h1>Review &amp; Submit</h1>
-        <p>Confirm your information before sending for AI verification.</p>
-      </div>
+                        <!-- Analyzing Badge -->
+                        <div class="analyzing-badge" id="analyzingFront">
+                            <span>●</span> Analyzing
+                        </div>
 
-      <div class="review-card">
-        <h3>Personal Details</h3>
-        <div class="review-row"><span>Full Name</span><span id="rv-name">—</span></div>
-        <div class="review-row"><span>Gender</span><span id="rv-gender">—</span></div>
-        <div class="review-row"><span>ID Number</span><span id="rv-id">—</span></div>
-        <div class="review-row"><span>Phone</span><span id="rv-phone">—</span></div>
-        <div class="review-row"><span>MSISDN</span><span id="rv-msisdn">—</span></div>
-        <div class="review-row"><span>District</span><span id="rv-district">—</span></div>
-        <div class="review-row"><span>Document Type</span><span id="rv-doctype">—</span></div>
-      </div>
+                        <!-- Camera Switch -->
+                        <button class="camera-switch-btn" id="switchCameraBtnFront" onclick="switchCamera('Front')">
+                            🔄 Back Cam
+                        </button>
 
-      <!-- ID mode thumbnails -->
-      <div class="review-images" id="rv-id-images">
-        <div class="thumb-item">
-          <img id="rv-front" alt="Front ID"/>
-          <span>Front ID</span>
-        </div>
-        <div class="thumb-item">
-          <img id="rv-back" alt="Back ID"/>
-          <span>Back ID</span>
-        </div>
-        <div class="thumb-item">
-          <img id="rv-selfie" alt="Selfie"/>
-          <span>Selfie</span>
-        </div>
-      </div>
+                        <!-- Progress Bar -->
+                        <div class="capture-progress-track">
+                            <div class="capture-progress-fill progress-wait" id="captureProgressFront"></div>
+                        </div>
+                    </div>
 
-      <!-- Certificate mode thumbnails -->
-      <div class="review-images" id="rv-cert-images" style="display:none">
-        <div class="thumb-item thumb-wide">
-          <div class="pdf-thumb" id="rv-cert-thumb">
-            <span class="pdf-thumb-icon">📄</span>
-            <span class="pdf-thumb-name" id="rv-cert-name">certificate.pdf</span>
-          </div>
-          <span>Replacement Certificate</span>
-        </div>
-        <div class="thumb-item">
-          <img id="rv-selfie-cert" alt="Selfie"/>
-          <span>Selfie</span>
-        </div>
-      </div>
+                    <!-- Preview -->
+                    <div class="preview-box" id="previewFront" style="display:none">
+                        <img id="imgFront" src="" alt="Front ID">
+                        <button class="btn-retake" onclick="retake('Front')">↺ Retake</button>
+                    </div>
 
-      <div class="btn-row">
-        <button class="btn-secondary" onclick="goStep(4)">← Back</button>
-        <button class="btn-primary submit-btn" onclick="submitKYC()" id="submitBtn">
-          <span id="submitLabel">Submit for Verification</span>
-          <span id="submitSpinner" class="spinner hidden"></span>
-        </button>
-      </div>
-    </section>
+                    <div class="capture-alt">
+                        <p>— or upload an image —</p>
+                        <label class="upload-label">
+                            📁 Upload Front ID image
+                            <input type="file" id="fileFront" accept="image/*" onchange="handleFileUpload('Front', this)" hidden>
+                        </label>
+                    </div>
+                </div>
 
-    <!-- ═══════════════════════════════════════════════════
-         STEP 6 — RESULT
-    ═══════════════════════════════════════════════════ -->
-    <section class="step" id="step6">
-      <div class="result-container" id="resultContainer"></div>
-    </section>
+                <!-- Camera Mode Buttons -->
+                <div class="btn-row" id="btnRowFrontCamera">
+                    <button class="btn-secondary" onclick="goStep(1)">← Back</button>
+                    <button class="btn-camera" onclick="capturePhoto('Front')">
+                        <span class="cam-icon">📷</span> Capture
+                    </button>
+                </div>
 
-  </main>
+                <!-- Preview Mode Buttons (AFTER CAPTURE) -->
+                <div class="btn-row" id="btnRowFrontPreview" style="display:none">
+                    <button class="btn-secondary" onclick="goStep(1)">← Back</button>
+                    <button class="btn-primary" onclick="goStep(3)">
+                        Next: Back ID <span class="btn-arrow">→</span>
+                    </button>
+                </div>
+            </div>
 
-  <div class="toast" id="toast"></div>
-  <script src="app.js"></script>
+            <!-- Certificate Upload Zone -->
+            <div id="certUploadZone" style="display:none">
+                <div class="cert-info-box">
+                    <span class="cert-info-icon">ℹ️</span>
+                    <div>
+                        <strong>Icyemezo Gisimbura Indangamuntu</strong>
+                        <p>This is the official ID replacement certificate issued by Irembo when your national ID is lost or pending renewal.</p>
+                    </div>
+                </div>
+
+                <!-- Cert Mode Tabs -->
+                <div class="cert-mode-tabs">
+                    <button class="cert-tab active" id="certTabUpload" onclick="switchCertMode('upload')">📄 Upload PDF</button>
+                    <button class="cert-tab" id="certTabCamera" onclick="switchCertMode('camera')">📷 Camera Capture</button>
+                </div>
+
+                <!-- Upload Panel -->
+                <div id="certUploadPanel">
+                    <div class="cert-upload-area" id="certDropZone">
+                        <div class="cert-upload-inner" id="certUploadInner">
+                            <span class="cert-upload-icon">📄</span>
+                            <h3 class="cert-upload-title">Upload Replacement Certificate</h3>
+                            <p class="cert-upload-sub">PDF only · Max 5MB</p>
+                            <label class="upload-label cert-btn">
+                                Choose PDF file
+                                <input type="file" id="fileCert" accept="application/pdf" onchange="handleCertUpload(this)" hidden>
+                            </label>
+                        </div>
+                        <div class="cert-preview" id="certPreview" style="display:none">
+                            <span class="cert-preview-icon">📄</span>
+                            <div class="cert-preview-info">
+                                <span class="cert-preview-name" id="certFileName">document.pdf</span>
+                                <span class="cert-preview-size" id="certFileSize">0 KB</span>
+                            </div>
+                            <button class="btn-retake-cert" onclick="removeCert()">✕ Remove</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Camera Capture Panel -->
+                <div id="certCameraSection" style="display:none">
+                    <div class="cert-camera-section">
+                        <div class="cert-camera-header">
+                            <span class="cert-camera-title">Point camera at certificate</span>
+                            <button class="camera-switch-btn" onclick="switchCertCamera()">↺</button>
+                        </div>
+                        <div class="cert-camera-frame">
+                            <video id="videoCert" autoplay playsinline muted></video>
+                            <canvas id="canvasCert" style="display:none"></canvas>
+                        </div>
+                        <div class="cert-camera-controls">
+                            <button class="btn-cert-capture" onclick="captureCertFrame()">
+                                📸 Capture Page
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="cert-camera-preview-grid" id="certCameraPreviewGrid"></div>
+
+                    <button class="btn-cert-convert" id="certConvertPDFBtn" style="display:none" onclick="convertCertImagesToPDF()">
+                        ✅ Convert to PDF
+                    </button>
+                </div>
+
+                <div class="cert-note">
+                    <strong>Note:</strong> The certificate must be valid (not expired) and issued by a recognised Umurenge office.
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn-secondary" onclick="goStep(1)">← Back</button>
+                    <button class="btn-primary" id="step2NextBtn" onclick="goStep(4)">
+                        Next: Take Selfie <span class="btn-arrow">→</span>
+                    </button>
+                </div>
+            </div>
+
+            <span class="err center" id="err-front"></span>
+        </section>
+
+        <!-- STEP 3: Back ID Card -->
+        <section class="step" id="step3">
+            <div class="step-header">
+                <span class="step-icon">🪪</span>
+                <h1>Back ID Card</h1>
+                <p>Flip your ID and capture the back side clearly.</p>
+            </div>
+
+            <div class="capture-zone">
+                <div class="camera-frame" id="cameraFrameBack">
+                    <video id="videoBack" autoplay playsinline muted></video>
+                    <canvas id="canvasBack" style="display:none"></canvas>
+                    
+                    <div class="id-smart-overlay" id="captureZoneBack">
+                        <div class="id-overlay-shadow"></div>
+                        <div class="id-overlay-box">
+                            <div class="id-corner tl"></div>
+                            <div class="id-corner tr"></div>
+                            <div class="id-corner bl"></div>
+                            <div class="id-corner br"></div>
+                        </div>
+                    </div>
+
+                    <div class="capture-feedback feedback-orange" id="feedbackBack">Align ID within the frame…</div>
+
+                    <div class="analyzing-badge" id="analyzingBack">
+                        <span>●</span> Analyzing
+                    </div>
+
+                    <button class="camera-switch-btn" id="switchCameraBtnBack" onclick="switchCamera('Back')">
+                        🔄 Front Cam
+                    </button>
+
+                    <div class="capture-progress-track">
+                        <div class="capture-progress-fill progress-wait" id="captureProgressBack"></div>
+                    </div>
+                </div>
+
+                <div class="preview-box" id="previewBack" style="display:none">
+                    <img id="imgBack" src="" alt="Back ID">
+                    <button class="btn-retake" onclick="retake('Back')">↺ Retake</button>
+                </div>
+
+                <div class="capture-alt">
+                    <p>— or upload an image —</p>
+                    <label class="upload-label">
+                        📁 Upload Back ID image
+                        <input type="file" id="fileBack" accept="image/*" onchange="handleFileUpload('Back', this)" hidden>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Camera Mode Buttons -->
+            <div class="btn-row" id="btnRowBackCamera">
+                <button class="btn-secondary" onclick="goStep(2)">← Back</button>
+                <button class="btn-camera" onclick="capturePhoto('Back')">
+                    <span class="cam-icon">📷</span> Capture
+                </button>
+            </div>
+
+            <!-- Preview Mode Buttons (AFTER CAPTURE) -->
+            <div class="btn-row" id="btnRowBackPreview" style="display:none">
+                <button class="btn-secondary" onclick="goStep(2)">← Back</button>
+                <button class="btn-primary" onclick="goStep(4)">
+                    Next: Capture Selfie <span class="btn-arrow">→</span>
+                </button>
+            </div>
+
+            <span class="err center" id="err-back"></span>
+        </section>
+
+        <!-- STEP 4: Selfie -->
+        <section class="step" id="step4">
+            <div class="step-header">
+                <span class="step-icon">🤳</span>
+                <h1>Take a Selfie</h1>
+                <p>Look directly at the camera. Make sure your face is well lit.</p>
+            </div>
+
+            <div class="capture-zone">
+                <div class="camera-frame selfie-frame" id="cameraFrameSelfie">
+                    <video id="videoSelfie" autoplay playsinline muted></video>
+                    <canvas id="canvasSelfie" style="display:none"></canvas>
+                    
+                    <!-- Face Oval Overlay -->
+                    <div class="face-oval-wrapper" id="captureZoneSelfie">
+                        <div class="face-oval-ring"></div>
+                        <div class="face-oval-mask"></div>
+                    </div>
+
+                    <div class="capture-feedback feedback-orange" id="feedbackSelfie">Center your face in the oval…</div>
+
+                    <div class="analyzing-badge" id="analyzingSelfie">
+                        <span>●</span> Analyzing
+                    </div>
+
+                    <button class="camera-switch-btn" id="switchCameraBtnSelfie" onclick="switchCamera('Selfie')">
+                        🔄 Back Cam
+                    </button>
+
+                    <div class="capture-progress-track">
+                        <div class="capture-progress-fill progress-wait" id="captureProgressSelfie"></div>
+                    </div>
+                </div>
+
+                <div class="preview-box" id="previewSelfie" style="display:none">
+                    <img id="imgSelfie" src="" alt="Selfie" class="selfie-img">
+                    <button class="btn-retake" onclick="retake('Selfie')">↺ Retake</button>
+                </div>
+            </div>
+
+            <!-- Camera Mode Buttons -->
+            <div class="btn-row" id="btnRowSelfieCamera">
+                <button class="btn-secondary" id="step4BackBtn" onclick="goStep(3)">← Back</button>
+                <button class="btn-camera" onclick="capturePhoto('Selfie')">
+                    <span class="cam-icon">🤳</span> Capture
+                </button>
+            </div>
+
+            <!-- Preview Mode Buttons (AFTER CAPTURE) -->
+            <div class="btn-row" id="btnRowSelfiePreview" style="display:none">
+                <button class="btn-secondary" onclick="goStep(3)">← Back</button>
+                <button class="btn-primary" onclick="goStep(5)">
+                    Next: Review & Submit <span class="btn-arrow">→</span>
+                </button>
+            </div>
+
+            <span class="err center" id="err-selfie"></span>
+        </section>
+
+        <!-- STEP 5: Review & Submit -->
+        <section class="step" id="step5">
+            <div class="step-header">
+                <span class="step-icon">✅</span>
+                <h1>Review & Submit</h1>
+                <p>Confirm your information before sending for AI verification.</p>
+            </div>
+
+            <div class="review-card">
+                <h3>Personal Details</h3>
+                <div class="review-row">
+                    <span>Full Name</span>
+                    <span id="rv-name">—</span>
+                </div>
+                <div class="review-row">
+                    <span>Gender</span>
+                    <span id="rv-gender">—</span>
+                </div>
+                <div class="review-row">
+                    <span>ID Number</span>
+                    <span id="rv-id">—</span>
+                </div>
+                <div class="review-row">
+                    <span>Phone</span>
+                    <span id="rv-phone">—</span>
+                </div>
+                <div class="review-row">
+                    <span>MSISDN</span>
+                    <span id="rv-msisdn">—</span>
+                </div>
+                <div class="review-row">
+                    <span>District</span>
+                    <span id="rv-district">—</span>
+                </div>
+                <div class="review-row">
+                    <span>Document Type</span>
+                    <span id="rv-doctype">—</span>
+                </div>
+            </div>
+
+            <div class="review-card">
+                <h3>Documents</h3>
+                <div class="review-images" id="rv-id-images">
+                    <div class="thumb-item">
+                        <img id="rv-front" src="" alt="Front ID">
+                        <span>Front ID</span>
+                    </div>
+                    <div class="thumb-item">
+                        <img id="rv-back" src="" alt="Back ID">
+                        <span>Back ID</span>
+                    </div>
+                    <div class="thumb-item thumb-wide">
+                        <img id="rv-selfie" src="" alt="Selfie">
+                        <span>Selfie</span>
+                    </div>
+                </div>
+
+                <div class="review-images" id="rv-cert-images" style="display:none">
+                    <div class="thumb-item">
+                        <div class="pdf-thumb">
+                            <span class="pdf-thumb-icon">📄</span>
+                            <span class="pdf-thumb-name" id="rv-cert-name">certificate.pdf</span>
+                        </div>
+                        <span>Replacement Certificate</span>
+                    </div>
+                    <div class="thumb-item">
+                        <img id="rv-selfie-cert" src="" alt="Selfie" class="selfie-img">
+                        <span>Selfie</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn-secondary" onclick="goStep(4)">← Back</button>
+                <button class="btn-primary submit-btn" id="submitBtn" onclick="submitKYC()">
+                    <span id="submitLabel">Submit for Verification</span>
+                    <div class="spinner hidden" id="submitSpinner"></div>
+                </button>
+            </div>
+        </section>
+
+        <!-- STEP 6: Result -->
+        <section class="step" id="step6">
+            <div class="result-container" id="resultContainer">
+                <!-- Populated dynamically -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- OCR Mismatch Modal -->
+    <div id="ocrModalContainer"></div>
+
+    <script src="app.js"></script>
 </body>
 </html>
