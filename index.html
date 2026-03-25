@@ -12,12 +12,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" async></script>
 </head>
 <body>
+    <!-- Language Toggle -->
+    <div class="lang-toggle">
+        <button class="lang-btn active" data-lang="en" onclick="setLanguage('en')">English</button>
+        <button class="lang-btn" data-lang="rw" onclick="setLanguage('rw')">Kinyarwanda</button>
+    </div>
+
     <!-- Header -->
     <header class="app-header">
         <a href="#" class="logo">
             <img src="images/koralink.png" alt="KoraLink" class="logo-img">
         </a>
-        <div class="step-badge" id="stepBadge">Step 1 of 5</div>
+        <div class="step-badge" id="stepBadge" data-i18n="stepBadge">Step 1 of 5</div>
     </header>
 
     <!-- Progress Bar -->
@@ -32,61 +38,61 @@
         <section class="step active" id="step1">
             <div class="step-header">
                 <span class="step-icon">👤</span>
-                <h1>Agent Details</h1>
-                <p>Enter your personal information to begin registration.</p>
+                <h1 data-i18n="step1Title">Agent Details</h1>
+                <p data-i18n="step1Desc">Enter your personal information to begin registration.</p>
             </div>
 
             <div class="field-row">
                 <div class="field">
-                    <label for="firstName">First Name</label>
-                    <input type="text" id="firstName" placeholder="Enter first name" autocomplete="given-name">
+                    <label for="firstName" data-i18n="firstName">First Name</label>
+                    <input type="text" id="firstName" data-i18n-placeholder="firstNamePlaceholder" placeholder="Enter first name" autocomplete="given-name">
                     <span class="err" id="err-firstName"></span>
                 </div>
                 <div class="field">
-                    <label for="lastName">Last Name</label>
-                    <input type="text" id="lastName" placeholder="Enter last name" autocomplete="family-name">
+                    <label for="lastName" data-i18n="lastName">Last Name</label>
+                    <input type="text" id="lastName" data-i18n-placeholder="lastNamePlaceholder" placeholder="Enter last name" autocomplete="family-name">
                     <span class="err" id="err-lastName"></span>
                 </div>
             </div>
 
             <div class="field">
-                <label>Gender</label>
+                <label data-i18n="gender">Gender</label>
                 <div class="toggle-group">
-                    <button type="button" class="toggle-btn" data-value="Male">Male</button>
-                    <button type="button" class="toggle-btn" data-value="Female">Female</button>
+                    <button type="button" class="toggle-btn" data-value="Male" data-i18n="male">Male</button>
+                    <button type="button" class="toggle-btn" data-value="Female" data-i18n="female">Female</button>
                 </div>
-                <span class="err" id="err-gender"></span>
+                <span class="err" id="err-gender" data-i18n="genderError">Please select your gender</span>
             </div>
 
             <div class="field">
-                <label for="idNumber">ID Number</label>
-                <input type="tel" id="idNumber" placeholder="Enter ID number" maxlength="16" autocomplete="off">
-                <span class="err" id="err-idNumber"></span>
+                <label for="idNumber" data-i18n="idNumber">ID Number</label>
+                <input type="tel" id="idNumber" data-i18n-placeholder="idNumberPlaceholder" placeholder="Enter ID number" maxlength="16" autocomplete="off">
+                <span class="err" id="err-idNumber" data-i18n="idNumberError">Enter a valid ID number (≥ 10 digits)</span>
             </div>
 
             <div class="field">
-                <label for="phoneNumber">Phone Number</label>
-                <input type="tel" id="phoneNumber" placeholder="07XXXXXXXX" maxlength="10" autocomplete="tel">
-                <span class="err" id="err-phoneNumber"></span>
+                <label for="phoneNumber" data-i18n="phoneNumber">Phone Number</label>
+                <input type="tel" id="phoneNumber" data-i18n-placeholder="phonePlaceholder" placeholder="07XXXXXXXX" maxlength="10" autocomplete="tel">
+                <span class="err" id="err-phoneNumber" data-i18n="phoneError">Enter a valid Rwandan phone number (07XXXXXXXX)</span>
             </div>
 
             <div class="wallet-field">
-                <label for="msisdn">MSISDN (Wallet)</label>
+                <label for="msisdn" data-i18n="msisdn">MSISDN (Wallet)</label>
                 <label class="checkbox-label">
                     <input type="checkbox" id="sameAsPhone" checked>
                     <span class="checkbox-custom"></span>
-                    <span>Same as Phone Number</span>
+                    <span data-i18n="sameAsPhone">Same as Phone Number</span>
                 </label>
-                <input type="tel" id="msisdn" placeholder="07XXXXXXXX" maxlength="10" disabled>
-                <p class="hint">ⓘ Number linked to the agent's wallet.</p>
-                <span class="err" id="err-msisdn"></span>
+                <input type="tel" id="msisdn" data-i18n-placeholder="phonePlaceholder" placeholder="07XXXXXXXX" maxlength="10" disabled>
+                <p class="hint" data-i18n="walletHint">ⓘ Number linked to the agent's wallet.</p>
+                <span class="err" id="err-msisdn" data-i18n="msisdnError">Enter a valid MSISDN (07XXXXXXXX)</span>
             </div>
 
             <div class="field">
-                <label for="district">District</label>
+                <label for="district" data-i18n="district">District</label>
                 <div class="select-wrapper">
                     <select id="district">
-                        <option value="">Select District</option>
+                        <option value="" data-i18n="selectDistrict">Select District</option>
                         <option value="Kicukiro">Kicukiro</option>
                         <option value="Musanze">Musanze</option>
                         <option value="Nyagatare">Nyagatare</option>
@@ -98,11 +104,11 @@
                     </select>
                     <span class="select-arrow">▾</span>
                 </div>
-                <span class="err" id="err-district"></span>
+                <span class="err" id="err-district" data-i18n="districtError">Please select a district</span>
             </div>
 
             <button class="btn-primary" onclick="goStep(2)">
-                Next: ID Document <span class="btn-arrow">→</span>
+                <span data-i18n="nextIdDocument">Next: ID Document</span> <span class="btn-arrow">→</span>
             </button>
         </section>
 
@@ -110,23 +116,23 @@
         <section class="step" id="step2">
             <div class="step-header">
                 <span class="step-icon" id="step2Icon">🪪</span>
-                <h1 id="step2Title">Front ID Card</h1>
-                <p id="step2Desc">Position your ID within the frame and capture a clear photo.</p>
+                <h1 id="step2Title" data-i18n="step2TitleId">Front ID Card</h1>
+                <p id="step2Desc" data-i18n="step2DescId">Position your ID within the frame and capture a clear photo.</p>
             </div>
 
             <!-- Document Type Selector -->
             <div class="doc-type-card">
-                <label class="doc-type-label">What document do you have?</label>
+                <label class="doc-type-label" data-i18n="docTypeLabel">What document do you have?</label>
                 <div class="doc-type-grid">
                     <div class="doc-type-btn active" id="btnPhysicalID" onclick="setDocType('id')">
                         <span class="doc-type-icon">🪪</span>
-                        <span class="doc-type-name">National ID Card</span>
-                        <span class="doc-type-sub">Physical card (front & back)</span>
+                        <span class="doc-type-name" data-i18n="nationalId">National ID Card</span>
+                        <span class="doc-type-sub" data-i18n="nationalIdSub">Physical card (front & back)</span>
                     </div>
                     <div class="doc-type-btn" id="btnCertificate" onclick="setDocType('cert')">
                         <span class="doc-type-icon">📄</span>
-                        <span class="doc-type-name">Replacement Certificate</span>
-                        <span class="doc-type-sub">Icyemezo Gisimbura Indangamuntu (PDF)</span>
+                        <span class="doc-type-name" data-i18n="replacementCert">Replacement Certificate</span>
+                        <span class="doc-type-sub" data-i18n="replacementCertSub">Icyemezo Gisimbura Indangamuntu (PDF)</span>
                     </div>
                 </div>
             </div>
@@ -150,15 +156,15 @@
                         </div>
 
                         <!-- Feedback Label -->
-                        <div class="capture-feedback feedback-orange" id="feedbackFront">Align ID within the frame…</div>
+                        <div class="capture-feedback feedback-orange" id="feedbackFront" data-i18n="alignId">Align ID within the frame…</div>
 
                         <!-- Analyzing Badge -->
                         <div class="analyzing-badge" id="analyzingFront">
-                            <span>●</span> Analyzing
+                            <span>●</span> <span data-i18n="analyzing">Analyzing</span>
                         </div>
 
                         <!-- Camera Switch -->
-                        <button class="camera-switch-btn" id="switchCameraBtnFront" onclick="switchCamera('Front')">
+                        <button class="camera-switch-btn" id="switchCameraBtnFront" onclick="switchCamera('Front')" data-i18n="backCam">
                             🔄 Back Cam
                         </button>
 
@@ -171,13 +177,13 @@
                     <!-- Preview -->
                     <div class="preview-box" id="previewFront" style="display:none">
                         <img id="imgFront" src="" alt="Front ID">
-                        <button class="btn-retake" onclick="retake('Front')">↺ Retake</button>
+                        <button class="btn-retake" onclick="retake('Front')" data-i18n="retake">↺ Retake</button>
                     </div>
 
                     <div class="capture-alt">
-                        <p>— or upload an image —</p>
+                        <p data-i18n="orUpload">— or upload an image —</p>
                         <label class="upload-label">
-                            📁 Upload Front ID image
+                            <span data-i18n="uploadFront">📁 Upload Front ID image</span>
                             <input type="file" id="fileFront" accept="image/*" onchange="handleFileUpload('Front', this)" hidden>
                         </label>
                     </div>
@@ -185,17 +191,17 @@
 
                 <!-- Camera Mode Buttons -->
                 <div class="btn-row" id="btnRowFrontCamera">
-                    <button class="btn-secondary" onclick="goStep(1)">← Back</button>
+                    <button class="btn-secondary" onclick="goStep(1)" data-i18n="back">← Back</button>
                     <button class="btn-camera" onclick="capturePhoto('Front')">
-                        <span class="cam-icon">📷</span> Capture
+                        <span class="cam-icon">📷</span> <span data-i18n="capture">Capture</span>
                     </button>
                 </div>
 
                 <!-- Preview Mode Buttons (AFTER CAPTURE) -->
                 <div class="btn-row" id="btnRowFrontPreview" style="display:none">
-                    <button class="btn-secondary" onclick="goStep(1)">← Back</button>
+                    <button class="btn-secondary" onclick="goStep(1)" data-i18n="back">← Back</button>
                     <button class="btn-primary" onclick="goStep(3)">
-                        Next: Back ID <span class="btn-arrow">→</span>
+                        <span data-i18n="nextBackId">Next: Back ID</span> <span class="btn-arrow">→</span>
                     </button>
                 </div>
             </div>
@@ -205,15 +211,15 @@
                 <div class="cert-info-box">
                     <span class="cert-info-icon">ℹ️</span>
                     <div>
-                        <strong>Icyemezo Gisimbura Indangamuntu</strong>
-                        <p>This is the official ID replacement certificate issued by Irembo when your national ID is lost or pending renewal.</p>
+                        <strong data-i18n="certTitle">Icyemezo Gisimbura Indangamuntu</strong>
+                        <p data-i18n="certDesc">This is the official ID replacement certificate issued by Irembo when your national ID is lost or pending renewal.</p>
                     </div>
                 </div>
 
                 <!-- Cert Mode Tabs -->
                 <div class="cert-mode-tabs">
-                    <button class="cert-tab active" id="certTabUpload" onclick="switchCertMode('upload')">📄 Upload PDF</button>
-                    <button class="cert-tab" id="certTabCamera" onclick="switchCertMode('camera')">📷 Camera Capture</button>
+                    <button class="cert-tab active" id="certTabUpload" onclick="switchCertMode('upload')" data-i18n="uploadPdf">📄 Upload PDF</button>
+                    <button class="cert-tab" id="certTabCamera" onclick="switchCertMode('camera')" data-i18n="cameraCapture">📷 Camera Capture</button>
                 </div>
 
                 <!-- Upload Panel -->
@@ -221,10 +227,10 @@
                     <div class="cert-upload-area" id="certDropZone">
                         <div class="cert-upload-inner" id="certUploadInner">
                             <span class="cert-upload-icon">📄</span>
-                            <h3 class="cert-upload-title">Upload Replacement Certificate</h3>
-                            <p class="cert-upload-sub">PDF only · Max 5MB</p>
+                            <h3 class="cert-upload-title" data-i18n="uploadCertTitle">Upload Replacement Certificate</h3>
+                            <p class="cert-upload-sub" data-i18n="pdfOnly">PDF only · Max 5MB</p>
                             <label class="upload-label cert-btn">
-                                Choose PDF file
+                                <span data-i18n="choosePdf">Choose PDF file</span>
                                 <input type="file" id="fileCert" accept="application/pdf" onchange="handleCertUpload(this)" hidden>
                             </label>
                         </div>
@@ -234,7 +240,7 @@
                                 <span class="cert-preview-name" id="certFileName">document.pdf</span>
                                 <span class="cert-preview-size" id="certFileSize">0 KB</span>
                             </div>
-                            <button class="btn-retake-cert" onclick="removeCert()">✕ Remove</button>
+                            <button class="btn-retake-cert" onclick="removeCert()" data-i18n="remove">✕ Remove</button>
                         </div>
                     </div>
                 </div>
@@ -243,7 +249,7 @@
                 <div id="certCameraSection" style="display:none">
                     <div class="cert-camera-section">
                         <div class="cert-camera-header">
-                            <span class="cert-camera-title">Point camera at certificate</span>
+                            <span class="cert-camera-title" data-i18n="pointCamera">Point camera at certificate</span>
                             <button class="camera-switch-btn" onclick="switchCertCamera()">↺</button>
                         </div>
                         <div class="cert-camera-frame">
@@ -252,7 +258,7 @@
                         </div>
                         <div class="cert-camera-controls">
                             <button class="btn-cert-capture" onclick="captureCertFrame()">
-                                📸 Capture Page
+                                📸 <span data-i18n="capturePage">Capture Page</span>
                             </button>
                         </div>
                     </div>
@@ -260,31 +266,31 @@
                     <div class="cert-camera-preview-grid" id="certCameraPreviewGrid"></div>
 
                     <button class="btn-cert-convert" id="certConvertPDFBtn" style="display:none" onclick="convertCertImagesToPDF()">
-                        ✅ Convert to PDF
+                        ✅ <span data-i18n="convertPdf">Convert to PDF</span>
                     </button>
                 </div>
 
                 <div class="cert-note">
-                    <strong>Note:</strong> The certificate must be valid (not expired) and issued by a recognised Umurenge office.
+                    <strong data-i18n="note">Note:</strong> <span data-i18n="certNote">The certificate must be valid (not expired) and issued by a recognised Umurenge office.</span>
                 </div>
 
                 <div class="btn-row">
-                    <button class="btn-secondary" onclick="goStep(1)">← Back</button>
+                    <button class="btn-secondary" onclick="goStep(1)" data-i18n="back">← Back</button>
                     <button class="btn-primary" id="step2NextBtn" onclick="goStep(4)">
-                        Next: Take Selfie <span class="btn-arrow">→</span>
+                        <span data-i18n="nextSelfie">Next: Take Selfie</span> <span class="btn-arrow">→</span>
                     </button>
                 </div>
             </div>
 
-            <span class="err center" id="err-front"></span>
+            <span class="err center" id="err-front" data-i18n="frontIdError">Please capture or upload the front of your ID card.</span>
         </section>
 
         <!-- STEP 3: Back ID Card -->
         <section class="step" id="step3">
             <div class="step-header">
                 <span class="step-icon">🪪</span>
-                <h1>Back ID Card</h1>
-                <p>Flip your ID and capture the back side clearly.</p>
+                <h1 data-i18n="step3Title">Back ID Card</h1>
+                <p data-i18n="step3Desc">Flip your ID and capture the back side clearly.</p>
             </div>
 
             <div class="capture-zone">
@@ -302,13 +308,13 @@
                         </div>
                     </div>
 
-                    <div class="capture-feedback feedback-orange" id="feedbackBack">Align ID within the frame…</div>
+                    <div class="capture-feedback feedback-orange" id="feedbackBack" data-i18n="alignId">Align ID within the frame…</div>
 
                     <div class="analyzing-badge" id="analyzingBack">
-                        <span>●</span> Analyzing
+                        <span>●</span> <span data-i18n="analyzing">Analyzing</span>
                     </div>
 
-                    <button class="camera-switch-btn" id="switchCameraBtnBack" onclick="switchCamera('Back')">
+                    <button class="camera-switch-btn" id="switchCameraBtnBack" onclick="switchCamera('Back')" data-i18n="frontCam">
                         🔄 Front Cam
                     </button>
 
@@ -319,13 +325,13 @@
 
                 <div class="preview-box" id="previewBack" style="display:none">
                     <img id="imgBack" src="" alt="Back ID">
-                    <button class="btn-retake" onclick="retake('Back')">↺ Retake</button>
+                    <button class="btn-retake" onclick="retake('Back')" data-i18n="retake">↺ Retake</button>
                 </div>
 
                 <div class="capture-alt">
-                    <p>— or upload an image —</p>
+                    <p data-i18n="orUpload">— or upload an image —</p>
                     <label class="upload-label">
-                        📁 Upload Back ID image
+                        <span data-i18n="uploadBack">📁 Upload Back ID image</span>
                         <input type="file" id="fileBack" accept="image/*" onchange="handleFileUpload('Back', this)" hidden>
                     </label>
                 </div>
@@ -333,34 +339,34 @@
 
             <!-- Camera Mode Buttons -->
             <div class="btn-row" id="btnRowBackCamera">
-                <button class="btn-secondary" onclick="goStep(2)">← Back</button>
+                <button class="btn-secondary" onclick="goStep(2)" data-i18n="back">← Back</button>
                 <button class="btn-camera" onclick="capturePhoto('Back')">
-                    <span class="cam-icon">📷</span> Capture
+                    <span class="cam-icon">📷</span> <span data-i18n="capture">Capture</span>
                 </button>
             </div>
 
             <!-- Preview Mode Buttons (AFTER CAPTURE) -->
             <div class="btn-row" id="btnRowBackPreview" style="display:none">
-                <button class="btn-secondary" onclick="goStep(2)">← Back</button>
+                <button class="btn-secondary" onclick="goStep(2)" data-i18n="back">← Back</button>
                 <button class="btn-primary" onclick="goStep(4)">
-                    Next: Capture Selfie <span class="btn-arrow">→</span>
+                    <span data-i18n="nextSelfie">Next: Capture Selfie</span> <span class="btn-arrow">→</span>
                 </button>
             </div>
 
-            <span class="err center" id="err-back"></span>
+            <span class="err center" id="err-back" data-i18n="backIdError">Please capture or upload the back of your ID card.</span>
         </section>
 
         <!-- STEP 4: Selfie -->
         <section class="step" id="step4">
             <div class="step-header">
                 <span class="step-icon">🤳</span>
-                <h1>Take a Selfie</h1>
-                <p>Look directly at the camera. Make sure your face is well lit.</p>
+                <h1 data-i18n="step4Title">Take a Selfie</h1>
+                <p data-i18n="step4Desc">Look directly at the camera. Make sure your face is well lit.</p>
             </div>
 
             <div class="capture-zone">
                 <div class="camera-frame selfie-frame" id="cameraFrameSelfie">
-                    <video id="videoSelfie" autoplay playsinline muted></video>
+                    <video id="videoSelfie" autoplay playsinline muted class="mirror-video"></video>
                     <canvas id="canvasSelfie" style="display:none"></canvas>
                     
                     <!-- Face Oval Overlay -->
@@ -369,13 +375,13 @@
                         <div class="face-oval-mask"></div>
                     </div>
 
-                    <div class="capture-feedback feedback-orange" id="feedbackSelfie">Center your face in the oval…</div>
+                    <div class="capture-feedback feedback-orange" id="feedbackSelfie" data-i18n="centerFace">Center your face in the oval…</div>
 
                     <div class="analyzing-badge" id="analyzingSelfie">
-                        <span>●</span> Analyzing
+                        <span>●</span> <span data-i18n="analyzing">Analyzing</span>
                     </div>
 
-                    <button class="camera-switch-btn" id="switchCameraBtnSelfie" onclick="switchCamera('Selfie')">
+                    <button class="camera-switch-btn" id="switchCameraBtnSelfie" onclick="switchCamera('Selfie')" data-i18n="backCam">
                         🔄 Back Cam
                     </button>
 
@@ -386,83 +392,83 @@
 
                 <div class="preview-box" id="previewSelfie" style="display:none">
                     <img id="imgSelfie" src="" alt="Selfie" class="selfie-img">
-                    <button class="btn-retake" onclick="retake('Selfie')">↺ Retake</button>
+                    <button class="btn-retake" onclick="retake('Selfie')" data-i18n="retake">↺ Retake</button>
                 </div>
             </div>
 
             <!-- Camera Mode Buttons -->
             <div class="btn-row" id="btnRowSelfieCamera">
-                <button class="btn-secondary" id="step4BackBtn" onclick="goStep(3)">← Back</button>
+                <button class="btn-secondary" id="step4BackBtn" onclick="goStep(3)" data-i18n="back">← Back</button>
                 <button class="btn-camera" onclick="capturePhoto('Selfie')">
-                    <span class="cam-icon">🤳</span> Capture
+                    <span class="cam-icon">🤳</span> <span data-i18n="captureSelfie">Capture</span>
                 </button>
             </div>
 
             <!-- Preview Mode Buttons (AFTER CAPTURE) -->
             <div class="btn-row" id="btnRowSelfiePreview" style="display:none">
-                <button class="btn-secondary" onclick="goStep(3)">← Back</button>
+                <button class="btn-secondary" onclick="goStep(3)" data-i18n="back">← Back</button>
                 <button class="btn-primary" onclick="goStep(5)">
-                    Next: Review & Submit <span class="btn-arrow">→</span>
+                    <span data-i18n="nextReview">Next: Review & Submit</span> <span class="btn-arrow">→</span>
                 </button>
             </div>
 
-            <span class="err center" id="err-selfie"></span>
+            <span class="err center" id="err-selfie" data-i18n="selfieError">Please take a selfie.</span>
         </section>
 
         <!-- STEP 5: Review & Submit -->
         <section class="step" id="step5">
             <div class="step-header">
                 <span class="step-icon">✅</span>
-                <h1>Review & Submit</h1>
-                <p>Confirm your information before sending for AI verification.</p>
+                <h1 data-i18n="step5Title">Review & Submit</h1>
+                <p data-i18n="step5Desc">Confirm your information before sending for AI verification.</p>
             </div>
 
             <div class="review-card">
-                <h3>Personal Details</h3>
+                <h3 data-i18n="personalDetails">Personal Details</h3>
                 <div class="review-row">
-                    <span>Full Name</span>
+                    <span data-i18n="fullName">Full Name</span>
                     <span id="rv-name">—</span>
                 </div>
                 <div class="review-row">
-                    <span>Gender</span>
+                    <span data-i18n="genderLabel">Gender</span>
                     <span id="rv-gender">—</span>
                 </div>
                 <div class="review-row">
-                    <span>ID Number</span>
+                    <span data-i18n="idNumberLabel">ID Number</span>
                     <span id="rv-id">—</span>
                 </div>
                 <div class="review-row">
-                    <span>Phone</span>
+                    <span data-i18n="phoneLabel">Phone</span>
                     <span id="rv-phone">—</span>
                 </div>
                 <div class="review-row">
-                    <span>MSISDN</span>
+                    <span data-i18n="msisdnLabel">MSISDN</span>
                     <span id="rv-msisdn">—</span>
                 </div>
                 <div class="review-row">
-                    <span>District</span>
+                    <span data-i18n="districtLabel">District</span>
                     <span id="rv-district">—</span>
                 </div>
                 <div class="review-row">
-                    <span>Document Type</span>
+                    <span data-i18n="docTypeLabel">Document Type</span>
                     <span id="rv-doctype">—</span>
                 </div>
             </div>
 
             <div class="review-card">
-                <h3>Documents</h3>
+                <h3 data-i18n="documents">Documents</h3>
                 <div class="review-images" id="rv-id-images">
                     <div class="thumb-item">
                         <img id="rv-front" src="" alt="Front ID">
-                        <span>Front ID</span>
+                        <span data-i18n="frontId">Front ID</span>
                     </div>
                     <div class="thumb-item">
                         <img id="rv-back" src="" alt="Back ID">
-                        <span>Back ID</span>
+                        <span data-i18n="backId">Back ID</span>
                     </div>
                     <div class="thumb-item thumb-wide">
                         <img id="rv-selfie" src="" alt="Selfie">
-                        <span>Selfie</span>
+                        <span data-i18n="selfieLabel">Selfie</span>
                     </div>
                 </div>
 
@@ -472,19 +478,19 @@
                             <span class="pdf-thumb-icon">📄</span>
                             <span class="pdf-thumb-name" id="rv-cert-name">certificate.pdf</span>
                         </div>
-                        <span>Replacement Certificate</span>
+                        <span data-i18n="replacementCert">Replacement Certificate</span>
                     </div>
                     <div class="thumb-item">
                         <img id="rv-selfie-cert" src="" alt="Selfie" class="selfie-img">
-                        <span>Selfie</span>
+                        <span data-i18n="selfieLabel">Selfie</span>
                     </div>
                 </div>
             </div>
 
             <div class="btn-row">
-                <button class="btn-secondary" onclick="goStep(4)">← Back</button>
+                <button class="btn-secondary" onclick="goStep(4)" data-i18n="back">← Back</button>
                 <button class="btn-primary submit-btn" id="submitBtn" onclick="submitKYC()">
-                    <span id="submitLabel">Submit for Verification</span>
+                    <span id="submitLabel" data-i18n="submitVerification">Submit for Verification</span>
                     <div class="spinner hidden" id="submitSpinner"></div>
                 </button>
             </div>
