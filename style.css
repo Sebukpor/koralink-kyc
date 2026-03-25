@@ -307,6 +307,15 @@ font-weight: 600;
 .btn-row { display: flex; gap: 14px; margin-top: 18px; }
 .btn-arrow { font-size: 1.1rem; }
 
+/* ── VIDEO MIRRORING ──────────────────────────────────────── */
+/* Add this block to your style.css */
+.mirror-video {
+    transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    -moz-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+}
+
 /* ── CAMERA CAPTURE ZONE ──────────────────────────────────── */
 .capture-zone {
 margin-bottom: 18px; border-radius: var(--radius); overflow: hidden;
