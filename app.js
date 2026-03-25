@@ -1,22 +1,312 @@
 /**
-KoraLink KYC — app.js  v3.0.0
+KoraLink KYC — app.js  v3.1.0
 ══════════════════════════════════════════════════════════════
-SMART CAPTURE SYSTEM INTEGRATED
-✅ Auto-capture engine with sharpness/brightness/stability
-✅ Camera switching (front ↔ back)
-✅ ID smart overlay with real-time feedback
-✅ ID auto-cropping (removes background)
-✅ OCR auto-fill via Tesseract.js
-✅ OCR mismatch modal (never auto-overwrites)
-✅ Certificate camera capture → PDF via jsPDF
-✅ Face detection hints for selfie
-✅ Color-coded live feedback
-✅ Vibration feedback on mobile
-✅ Low-end device detection
-✅ Step 5 Back button added
-✅ Gender: NO default selection
+✅ Real-time selfie mirroring via CSS
+✅ Kinyarwanda (rw) / English (en) i18n support
+✅ Smart Capture System Integrated
 ══════════════════════════════════════════════════════════════
 */
+
+// ── TRANSLATIONS ─────────────────────────────────────────────
+const TRANSLATIONS = {
+    en: {
+        // Step 1
+        step1Title: "Agent Details",
+        step1Desc: "Enter your personal information to begin registration.",
+        firstName: "First Name",
+        firstNamePlaceholder: "Enter first name",
+        lastName: "Last Name",
+        lastNamePlaceholder: "Enter last name",
+        gender: "Gender",
+        male: "Male",
+        female: "Female",
+        genderError: "Please select your gender",
+        idNumber: "ID Number",
+        idNumberPlaceholder: "Enter ID number",
+        idNumberError: "Enter a valid ID number (≥ 10 digits)",
+        phoneNumber: "Phone Number",
+        phonePlaceholder: "07XXXXXXXX",
+        phoneError: "Enter a valid Rwandan phone number (07XXXXXXXX)",
+        msisdn: "MSISDN (Wallet)",
+        sameAsPhone: "Same as Phone Number",
+        msisdnError: "Enter a valid MSISDN (07XXXXXXXX)",
+        walletHint: "ⓘ Number linked to the agent's wallet.",
+        district: "District",
+        selectDistrict: "Select District",
+        districtError: "Please select a district",
+        nextIdDocument: "Next: ID Document",
+        
+        // Step 2
+        step2TitleId: "Front ID Card",
+        step2DescId: "Position your ID within the frame and capture a clear photo.",
+        step2TitleCert: "Replacement Certificate",
+        step2DescCert: "Upload the Icyemezo Gisimbura Indangamuntu issued to you.",
+        docTypeLabel: "What document do you have?",
+        nationalId: "National ID Card",
+        nationalIdSub: "Physical card (front & back)",
+        replacementCert: "Replacement Certificate",
+        replacementCertSub: "Icyemezo Gisimbura Indangamuntu (PDF)",
+        alignId: "Align ID within the frame…",
+        analyzing: "Analyzing",
+        backCam: "🔄 Back Cam",
+        frontCam: "🔄 Front Cam",
+        retake: "↺ Retake",
+        orUpload: "— or upload an image —",
+        uploadFront: "📁 Upload Front ID image",
+        uploadBack: "📁 Upload Back ID image",
+        capture: "Capture",
+        nextBackId: "Next: Back ID",
+        nextSelfie: "Next: Take Selfie",
+        frontIdError: "Please capture or upload the front of your ID card.",
+        
+        // Certificate
+        certTitle: "Icyemezo Gisimbura Indangamuntu",
+        certDesc: "This is the official ID replacement certificate issued by Irembo when your national ID is lost or pending renewal.",
+        uploadPdf: "📄 Upload PDF",
+        cameraCapture: "📷 Camera Capture",
+        uploadCertTitle: "Upload Replacement Certificate",
+        pdfOnly: "PDF only · Max 5MB",
+        choosePdf: "Choose PDF file",
+        remove: "✕ Remove",
+        pointCamera: "Point camera at certificate",
+        capturePage: "📸 Capture Page",
+        convertPdf: "✅ Convert to PDF",
+        note: "Note:",
+        certNote: "The certificate must be valid (not expired) and issued by a recognised Umurenge office.",
+        
+        // Step 3
+        step3Title: "Back ID Card",
+        step3Desc: "Flip your ID and capture the back side clearly.",
+        backIdError: "Please capture or upload the back of your ID card.",
+        
+        // Step 4
+        step4Title: "Take a Selfie",
+        step4Desc: "Look directly at the camera. Make sure your face is well lit.",
+        centerFace: "Center your face in the oval…",
+        captureSelfie: "Capture",
+        selfieError: "Please take a selfie.",
+        nextReview: "Next: Review & Submit",
+        
+        // Step 5
+        step5Title: "Review & Submit",
+        step5Desc: "Confirm your information before sending for AI verification.",
+        personalDetails: "Personal Details",
+        fullName: "Full Name",
+        genderLabel: "Gender",
+        idNumberLabel: "ID Number",
+        phoneLabel: "Phone",
+        msisdnLabel: "MSISDN",
+        districtLabel: "District",
+        docTypeLabel: "Document Type",
+        documents: "Documents",
+        frontId: "Front ID",
+        backId: "Back ID",
+        selfieLabel: "Selfie",
+        submitVerification: "Submit for Verification",
+        back: "← Back",
+        
+        // Step 6 / Results
+        approved: "Verification Approved!",
+        rejected: "Verification Failed",
+        confidenceScore: "Confidence Score:",
+        issuesFound: "Issues Found",
+        approvedMessage: "Your data has been securely saved. You will receive confirmation shortly.",
+        rejectedMessage: "Please correct the issues above and try again.",
+        tryAgain: "↺ Try Again",
+        startNew: "Start New Registration",
+        
+        // Auto-capture feedback
+        feedbackPerfect: "✓ Perfect — hold still",
+        feedbackDark: "Too dark — find better lighting",
+        feedbackBright: "Too bright — reduce glare",
+        feedbackBlurry: "Blurry — hold steady",
+        feedbackVeryBlurry: "Very blurry — hold still",
+        feedbackHoldStill: "Hold still…",
+        feedbackAlmost: "Almost there — hold steady",
+        
+        // OCR
+        ocrTitle: "ID Data Detected",
+        ocrSubtitle: "We found different data in your ID card scan:",
+        detectedName: "Detected Name",
+        detectedId: "Detected ID No.",
+        ocrQuestion: "Would you like to use the detected values?",
+        useDetected: "Use Detected Info",
+        keepMine: "Keep My Input",
+        ocrScanning: "Scanning ID…",
+        ocrUpdated: "✓ Fields updated from card scan",
+        
+        // Toast messages
+        autoCaptured: "📸 Auto-captured!",
+        pageCaptured: "Page {n} captured ✓",
+        pdfReady: "✅ Certificate PDF ready!",
+        uploadSuccess: "Certificate uploaded ✓",
+        cameraUnavailable: "Camera unavailable — please upload a file instead.",
+        fileTooLarge: "File too large (max {n}MB)",
+        invalidFile: "Only JPG, PNG, or WebP allowed.",
+        onlyPdf: "Only PDF files are accepted.",
+        pdfTooLarge: "PDF too large (max {n}MB).",
+        submissionFailed: "Submission failed: {msg}",
+        preparing: "Preparing…",
+        compressing: "Compressing images…",
+        aiVerification: "AI Verification…",
+        saving: "Saving to Drive & Sheet…",
+        approvedToast: "✅ Data saved to Drive & Sheet",
+        syncWarning: "⚠ Approved but data sync failed — contact support.",
+        
+        // Step badge
+        stepBadge: "Step {current} of {total}",
+        complete: "Complete"
+    },
+    
+    rw: {
+        // Step 1
+        step1Title: "Amakuru y'Umukozi",
+        step1Desc: "Injiza amakuru yawe bwite utangire kwiyandikisha.",
+        firstName: "Izina ry'Umuntu",
+        firstNamePlaceholder: "Injiza izina ry'umuntu",
+        lastName: "Izina ry'Umuryango",
+        lastNamePlaceholder: "Injiza izina ry'umuryango",
+        gender: "Igitsina",
+        male: "Gabo",
+        female: "Gore",
+        genderError: "Nyamuneka hitamo igitsina cyawe",
+        idNumber: "Nimero y'Indangamuntu",
+        idNumberPlaceholder: "Injiza nimero y'indangamuntu",
+        idNumberError: "Injiza nimero y'indangamuntu yemewe (inenge 10+)",
+        phoneNumber: "Nimero ya Telefoni",
+        phonePlaceholder: "07XXXXXXXX",
+        phoneError: "Injiza nimero ya telefoni y'u Rwanda (07XXXXXXXX)",
+        msisdn: "MSISDN (Amafaranga)",
+        sameAsPhone: "Igereranya na Nimero ya Telefoni",
+        msisdnError: "Injiza MSISDN yemewe (07XXXXXXXX)",
+        walletHint: "ⓘ Nimero yihuza na konti y'umukozi.",
+        district: "Akarere",
+        selectDistrict: "Hitamo Akarere",
+        districtError: "Nyamuneka hitamo akarere",
+        nextIdDocument: "Ibikurikira: Indangamuntu",
+        
+        // Step 2
+        step2TitleId: "Indangamuntu - Ruhande rw'Imbere",
+        step2DescId: "Shyira indangamuntu mu fremu ufate ifoto yirabira.",
+        step2TitleCert: "Icyemezo Gisimbura Indangamuntu",
+        step2DescCert: "Shyira icyemezo cyawe cy'Indangamuntu (Icyemezo Gisimbura Indangamuntu).",
+        docTypeLabel: "Ni iyihe nyandiko ufite?",
+        nationalId: "Indangamuntu y'Igihugu",
+        nationalIdSub: "Ikarita y'igitsina (imbere & inyuma)",
+        replacementCert: "Icyemezo Gisimbura Indangamuntu",
+        replacementCertSub: "Icyemezo Gisimbura Indangamuntu (PDF)",
+        alignId: "Shyira Indangamuntu mu fremu…",
+        analyzing: "Iri gusuzuma",
+        backCam: "🔄 Kamera Inyuma",
+        frontCam: "🔄 Kamera Imbere",
+        retake: "↺ Fongere",
+        orUpload: "— cyangwa shyira ifoto —",
+        uploadFront: "📁 Shyira Indangamuntu - Imbere",
+        uploadBack: "📁 Shyira Indangamuntu - Inyuma",
+        capture: "Fata Ifoto",
+        nextBackId: "Ibikurikira: Indangamuntu Inyuma",
+        nextSelfie: "Ibikurikira: Fata Ifoto y'Ubusobanuro",
+        frontIdError: "Nyamuneka fata ifoto cyangwa ushyire indangamuntu y'imbere.",
+        
+        // Certificate
+        certTitle: "Icyemezo Gisimbura Indangamuntu",
+        certDesc: "Iki ni icyemezo cyemewe cyatanzwe na Irembo igihe indangamuntu yawe yatakaye cyangwa isubirwamo.",
+        uploadPdf: "📄 Shyira PDF",
+        cameraCapture: "📷 Fata na Kamera",
+        uploadCertTitle: "Shyira Icyemezo Gisimbura Indangamuntu",
+        pdfOnly: "PDF gusa · Hejuru ya MB 5",
+        choosePdf: "Hitamo dosiye ya PDF",
+        remove: "✕ Kuraho",
+        pointCamera: "Teza kamera ku cyemezo",
+        capturePage: "📸 Fata Ipaji",
+        convertPdf: "✅ Hindura mu PDF",
+        note: "Icyitonderwa:",
+        certNote: "Icyemezo kigomba kuba gikiri gikwiye (ntikigiye) kandi gitanzwe na ofisi y'Umurenge.",
+        
+        // Step 3
+        step3Title: "Indangamuntu - Ruhande rw'Inyuma",
+        step3Desc: "Hindura indangamuntu ufate ruhande rw'inyuma neza.",
+        backIdError: "Nyamuneka fata ifoto cyangwa ushyire indangamuntu y'inyuma.",
+        
+        // Step 4
+        step4Title: "Fata Ifoto y'Ubusobanuro",
+        step4Desc: "Raba muri kamera. Reba ko mu maso hari urumuri rwiza.",
+        centerFace: "Shyira mu maso mu murongo…",
+        captureSelfie: "Fata Ifoto",
+        selfieError: "Nyamuneka fata ifoto y'ubusobanuro.",
+        nextReview: "Ibikurikira: Suzuma & Ohereza",
+        
+        // Step 5
+        step5Title: "Suzuma & Ohereza",
+        step5Desc: "Emeza amakuru yawe mbere yo kohereza gisuzumwa na AI.",
+        personalDetails: "Amakuru bwite",
+        fullName: "Amazina yose",
+        genderLabel: "Igitsina",
+        idNumberLabel: "Nimero y'Indangamuntu",
+        phoneLabel: "Telefoni",
+        msisdnLabel: "MSISDN",
+        districtLabel: "Akarere",
+        docTypeLabel: "Ubwoko bw'Inyandiko",
+        documents: "Inyandiko",
+        frontId: "Indangamuntu - Imbere",
+        backId: "Indangamuntu - Inyuma",
+        selfieLabel: "Ifoto y'Ubusobanuro",
+        submitVerification: "Ohereza Gisuzumwe",
+        back: "← Subira Inyuma",
+        
+        // Step 6 / Results
+        approved: "Gisuzumwe Byemewe!",
+        rejected: "Gisuzumwe Byanze",
+        confidenceScore: "Amanota yo Kwizera:",
+        issuesFound: "Ibibazo Byabonetse",
+        approvedMessage: "Amakuru yawe yabitswe neza. Uzamenyeshwa vuba.",
+        rejectedMessage: "Nyamuneka kosora ibibazo hejuru ugerageze nanone.",
+        tryAgain: "↺ Gerageza Nanone",
+        startNew: "Tangaza Kwiyandikisha Gishya",
+        
+        // Auto-capture feedback
+        feedbackPerfect: "✓ Byiza — Reka aho",
+        feedbackDark: "Bijimye — Shaka urumuri",
+        feedbackBright: "Byeruye cyane — Kugabanya urumuri",
+        feedbackBlurry: "Kitagaragara neza — Reka aho",
+        feedbackVeryBlurry: "Ntikigaragarira neza — Reka aho",
+        feedbackHoldStill: "Reka aho…",
+        feedbackAlmost: "Hafi — Reka aho",
+        
+        // OCR
+        ocrTitle: "Amakuru y'Indangamuntu Yabonetse",
+        ocrSubtitle: "Twabonye amakuru atandukanye mu gusuzuma indangamuntu yawe:",
+        detectedName: "Izina Ryabonetse",
+        detectedId: "Nimero y'Indangamuntu",
+        ocrQuestion: "Urashaka gukoresha amakuru yabonetse?",
+        useDetected: "Koresha Amakuru Yabonetse",
+        keepMine: "Komeza Amakuru Yanjye",
+        ocrScanning: "Gusuzuma Indangamuntu…",
+        ocrUpdated: "✓ Amakuru yavuguruwe kuva mu karita",
+        
+        // Toast messages
+        autoCaptured: "📸 Yafotowe!",
+        pageCaptured: "Ipaji {n} yafotowe ✓",
+        pdfReady: "✅ Icyemezo PDF kirateguye!",
+        uploadSuccess: "Icyemezo cyashyizweho ✓",
+        cameraUnavailable: "Kamera ntibikunda — nyamuneka shyira dosiye.",
+        fileTooLarge: "Dosiye ninini cyane (hejuru ya MB {n})",
+        invalidFile: "JPG, PNG, cyangwa WebP gusa.",
+        onlyPdf: "PDF gusa zemewe.",
+        pdfTooLarge: "PDF ninini cyane (hejuru ya MB {n}).",
+        submissionFailed: "Kohereza byanze: {msg}",
+        preparing: "Bitegura…",
+        compressing: "Biracucutsa amafoto…",
+        aiVerification: "Gisuzumwa na AI…",
+        saving: "Birabitswa mu Drive & Sheet…",
+        approvedToast: "✅ Amakuru yabitswe mu Drive & Sheet",
+        syncWarning: "⚠ Byemewe ariko kubika byanze — hamagara ubufasha.",
+        
+        // Step badge
+        stepBadge: "Intambwe {current} kuri {total}",
+        complete: "Byarangiye"
+    }
+};
 
 // ── CONFIG ────────────────────────────────────────────────────
 const CONFIG = {
@@ -42,22 +332,10 @@ const CONFIG = {
     LOW_END_DEVICE: false,
 };
 
-// ── LOW-END DEVICE DETECTION ─────────────────────────────────
-(function detectDevice() {
-    const mem = navigator.deviceMemory || 4;
-    const cores = navigator.hardwareConcurrency || 4;
-    if (mem <= 1 || cores <= 2) {
-        CONFIG.LOW_END_DEVICE = true;
-        CONFIG.AUTO_CAPTURE_INTERVAL = 600;
-        CONFIG.OCR_ENABLED = false;
-        console.info("[KYC] Low-end device — auto-capture relaxed, OCR off.");
-    }
-})();
-
 // ── STATE ─────────────────────────────────────────────────────
 const STATE = {
     currentStep: 1,
-    gender: null,  // NO DEFAULT - user must select
+    gender: null,
     docType: "id",
     images: { front: null, back: null, selfie: null },
     cert: { file: null, b64: null, name: "", size: 0 },
@@ -66,7 +344,84 @@ const STATE = {
     autoCapture: { loops: {}, goodSince: {}, lastFrame: {} },
     ocr: { worker: null, running: false },
     certCameraImages: [],
+    currentLang: 'en'
 };
+
+// ── I18N FUNCTIONS ────────────────────────────────────────────
+function setLanguage(lang) {
+    STATE.currentLang = lang;
+    document.documentElement.lang = lang;
+    
+    // Update toggle buttons
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+    
+    // Update all elements with data-i18n
+    updatePageLanguage();
+    
+    // Update dynamic content
+    updateDynamicContent();
+    
+    showToast(t('languageChanged', lang === 'en' ? 'Language changed to English' : 'Ururimi rwahindutse mu Kinyarwanda'), 'success');
+}
+
+function t(key, fallback = '') {
+    const trans = TRANSLATIONS[STATE.currentLang];
+    return trans?.[key] || fallback || key;
+}
+
+function updatePageLanguage() {
+    // Update text content
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        const translation = t(key);
+        if (translation) {
+            // Preserve emoji at start if present
+            const emojiMatch = el.textContent.match(/^[📁📸✅🔄↺📷🤳📄]+/);
+            if (emojiMatch && !translation.match(/^[📁📸✅🔄↺📷🤳📄]+/)) {
+                el.textContent = emojiMatch[0] + ' ' + translation;
+            } else {
+                el.textContent = translation;
+            }
+        }
+    });
+    
+    // Update placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.dataset.i18nPlaceholder;
+        const translation = t(key);
+        if (translation) el.placeholder = translation;
+    });
+    
+    // Update error messages that are visible
+    updateErrorMessages();
+}
+
+function updateErrorMessages() {
+    // Update step badge
+    const totalVisible = STATE.docType === 'cert' ? 4 : 5;
+    const displayStep = STATE.docType === 'cert' && STATE.currentStep >= 4 ? STATE.currentStep - 1 : STATE.currentStep;
+    const stepBadge = document.getElementById('stepBadge');
+    if (stepBadge && STATE.currentStep <= 5) {
+        stepBadge.textContent = t('stepBadge').replace('{current}', displayStep).replace('{total}', totalVisible);
+    } else if (stepBadge) {
+        stepBadge.textContent = t('complete');
+    }
+}
+
+function updateDynamicContent() {
+    // Update document type specific text
+    if (STATE.docType === 'cert') {
+        document.getElementById('step2Title').textContent = t('step2TitleCert');
+        document.getElementById('step2Desc').textContent = t('step2DescCert');
+        document.getElementById('step2NextBtn').innerHTML = t('nextSelfie') + ' <span class="btn-arrow">→</span>';
+    } else {
+        document.getElementById('step2Title').textContent = t('step2TitleId');
+        document.getElementById('step2Desc').textContent = t('step2DescId');
+        document.getElementById('step2NextBtn').innerHTML = t('nextBackId') + ' <span class="btn-arrow">→</span>';
+    }
+}
 
 // ══════════════════════════════════════════════════════════════
 //  IMAGE COMPRESSION
@@ -100,16 +455,29 @@ function stripPrefix(dataURL) {
 // ══════════════════════════════════════════════════════════════
 function analyzeFrame(video, canvas, side) {
     if (!video || !video.videoWidth || video.readyState < 2) {
-        return { sharp: false, lit: false, stable: false, score: 0, feedback: "Starting camera…", feedbackColor: "orange" };
+        return { 
+            sharp: false, 
+            lit: false, 
+            stable: false, 
+            score: 0, 
+            feedback: t('startingCamera', "Starting camera…"), 
+            feedbackColor: "orange" 
+        };
     }
     
     const w = Math.min(video.videoWidth, 320);
     const h = Math.round(video.videoHeight * (w / video.videoWidth));
     canvas.width = w; canvas.height = h;
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
-    if (side === "Selfie") { ctx.setTransform(-1, 0, 0, 1, w, 0); }
+    
+    // Handle mirroring for selfie during analysis
+    if (side === "Selfie") { 
+        ctx.setTransform(-1, 0, 0, 1, w, 0); 
+    }
     ctx.drawImage(video, 0, 0, w, h);
-    if (side === "Selfie") { ctx.setTransform(1, 0, 0, 1, 0, 0); }
+    if (side === "Selfie") { 
+        ctx.setTransform(1, 0, 0, 1, 0, 0); 
+    }
     const imageData = ctx.getImageData(0, 0, w, h);
     const px = imageData.data;
 
@@ -156,13 +524,32 @@ function analyzeFrame(video, canvas, side) {
     }
     STATE.autoCapture.lastFrame[side] = new Uint8ClampedArray(px);
 
-    // Feedback
-    let feedback = "✓ Perfect — hold still", feedbackColor = "green";
-    if (brightness < CONFIG.BRIGHTNESS_MIN) { feedback = "Too dark — find better lighting"; feedbackColor = "red"; }
-    else if (brightness > CONFIG.BRIGHTNESS_MAX) { feedback = "Too bright — reduce glare"; feedbackColor = "red"; }
-    else if (!sharp) { feedback = lapVar < 10 ? "Very blurry — hold still" : "Blurry — hold steady"; feedbackColor = "orange"; }
-    else if (!stable) { feedback = "Hold still…"; feedbackColor = "orange"; }
-    else if (!verySharp) { feedback = "Almost there — hold steady"; feedbackColor = "orange"; }
+    // Feedback with i18n
+    let feedback, feedbackColor;
+    if (brightness < CONFIG.BRIGHTNESS_MIN) { 
+        feedback = t('feedbackDark'); 
+        feedbackColor = "red"; 
+    }
+    else if (brightness > CONFIG.BRIGHTNESS_MAX) { 
+        feedback = t('feedbackBright'); 
+        feedbackColor = "red"; 
+    }
+    else if (!sharp) { 
+        feedback = lapVar < 10 ? t('feedbackVeryBlurry') : t('feedbackBlurry'); 
+        feedbackColor = "orange"; 
+    }
+    else if (!stable) { 
+        feedback = t('feedbackHoldStill'); 
+        feedbackColor = "orange"; 
+    }
+    else if (!verySharp) { 
+        feedback = t('feedbackAlmost'); 
+        feedbackColor = "orange"; 
+    }
+    else {
+        feedback = t('feedbackPerfect');
+        feedbackColor = "green";
+    }
 
     const score = (lit ? 33 : 0) + (sharp ? 33 : 0) + (stable ? 34 : 0);
     return { sharp, lit, stable, score, feedback, feedbackColor, lapVar, brightness };
@@ -235,10 +622,13 @@ function performAutoCapture(side) {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const ctx = canvas.getContext("2d");
-    if (side === "Selfie") { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
+    if (side === "Selfie") { 
+        ctx.translate(canvas.width, 0); 
+        ctx.scale(-1, 1); 
+    }
     ctx.drawImage(video, 0, 0);
     const dataURL = (side === "Front" || side === "Back") ? cropToIDOverlay(canvas) : canvas.toDataURL("image/jpeg", CONFIG.IMAGE_QUALITY);
-    showToast("📸 Auto-captured!", "success");
+    showToast(t('autoCaptured'), "success");
     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
     saveImage(side, dataURL);
     stopStream(side);
@@ -266,10 +656,14 @@ async function switchCamera(side) {
     stopAutoCapture(side);
     stopStream(side);
     const btn = document.getElementById(`switchCameraBtn${side}`);
-    if (btn) { btn.textContent = "↺"; btn.disabled = true; }
+    if (btn) { 
+        btn.textContent = "↺"; 
+        btn.disabled = true; 
+    }
     await startCamera(side);
     if (btn) {
-        btn.textContent = STATE.facingModes[side] === "user" ? "🔄 Back Cam" : "🔄 Front Cam";
+        const isBack = STATE.facingModes[side] === "environment";
+        btn.textContent = isBack ? t('backCam') : t('frontCam');
         btn.disabled = false;
     }
     setTimeout(() => startAutoCapture(side), 800);
@@ -361,9 +755,22 @@ function showOCRMismatchModal(extracted, flags) {
     const modal = document.createElement("div");
     modal.id = "ocrModal";
     modal.className = "ocr-modal-overlay";
-    const namePart = flags.nameMismatch && extracted.name ? `<div class="ocr-row"><span class="ocr-label">Detected Name</span><strong class="ocr-value">${escHTML(extracted.name)}</strong></div>` : "";
-    const idPart = flags.idMismatch && extracted.idNumber ? `<div class="ocr-row"><span class="ocr-label">Detected ID No.</span><strong class="ocr-value">${escHTML(extracted.idNumber)}</strong></div>` : "";
-    modal.innerHTML = `<div class="ocr-modal"><div class="ocr-modal-icon">🔍</div><h3 class="ocr-modal-title">ID Data Detected</h3><p class="ocr-modal-sub">We found different data in your ID card scan:</p>${namePart}${idPart}<p class="ocr-modal-question">Would you like to use the detected values?</p><div class="ocr-modal-actions"><button class="btn-ocr-use" id="ocrUseDetected">Use Detected Info</button><button class="btn-ocr-keep" id="ocrKeepMine">Keep My Input</button></div></div>`;
+    const namePart = flags.nameMismatch && extracted.name ? 
+        `<div class="ocr-row"><span class="ocr-label">${t('detectedName')}</span><strong class="ocr-value">${escHTML(extracted.name)}</strong></div>` : "";
+    const idPart = flags.idMismatch && extracted.idNumber ? 
+        `<div class="ocr-row"><span class="ocr-label">${t('detectedId')}</span><strong class="ocr-value">${escHTML(extracted.idNumber)}</strong></div>` : "";
+    modal.innerHTML = `
+        <div class="ocr-modal">
+            <div class="ocr-modal-icon">🔍</div>
+            <h3 class="ocr-modal-title">${t('ocrTitle')}</h3>
+            <p class="ocr-modal-sub">${t('ocrSubtitle')}</p>
+            ${namePart}${idPart}
+            <p class="ocr-modal-question">${t('ocrQuestion')}</p>
+            <div class="ocr-modal-actions">
+                <button class="btn-ocr-use" id="ocrUseDetected">${t('useDetected')}</button>
+                <button class="btn-ocr-keep" id="ocrKeepMine">${t('keepMine')}</button>
+            </div>
+        </div>`;
     document.getElementById("ocrModalContainer").appendChild(modal);
     document.getElementById("ocrUseDetected").onclick = () => {
         if (flags.nameMismatch && extracted.name) {
@@ -377,7 +784,7 @@ function showOCRMismatchModal(extracted, flags) {
         }
         if (flags.idMismatch && extracted.idNumber) document.getElementById("idNumber").value = extracted.idNumber;
         modal.remove();
-        showToast("✓ Fields updated from card scan", "success");
+        showToast(t('ocrUpdated'), "success");
     };
     document.getElementById("ocrKeepMine").onclick = () => modal.remove();
     modal.addEventListener("click", e => { if (e.target === modal) modal.remove(); });
@@ -389,7 +796,7 @@ function showOCRProgress(show) {
         el = document.createElement("div");
         el.id = "ocrProgressBar";
         el.className = "ocr-progress";
-        el.innerHTML = `<span>Scanning ID…</span><div class="ocr-progress-dots"><span></span><span></span><span></span></div>`;
+        el.innerHTML = `<span>${t('ocrScanning')}</span><div class="ocr-progress-dots"><span></span><span></span><span></span></div>`;
         document.querySelector(".form-shell")?.prepend(el);
     }
     if (el) el.style.display = show ? "flex" : "none";
@@ -434,28 +841,33 @@ async function startCertCamera() {
         STATE.streams["Cert"] = stream;
         video.srcObject = stream;
     } catch (e) {
-        showToast("Camera not available", "error");
+        showToast(t('cameraUnavailable'), "error");
     }
 }
 
 function captureCertFrame() {
     const video = document.getElementById("videoCert");
     const canvas = document.getElementById("canvasCert");
-    if (!video || !video.videoWidth) { showToast("Camera not ready", "error"); return; }
+    if (!video || !video.videoWidth) { showToast(t('cameraNotReady', "Camera not ready"), "error"); return; }
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext("2d").drawImage(video, 0, 0);
     const dataURL = canvas.toDataURL("image/jpeg", 0.85);
     STATE.certCameraImages.push(dataURL);
     updateCertCameraPreview();
-    showToast(`Page ${STATE.certCameraImages.length} captured ✓`, "success");
+    showToast(t('pageCaptured').replace('{n}', STATE.certCameraImages.length), "success");
     if (navigator.vibrate) navigator.vibrate(80);
 }
 
 function updateCertCameraPreview() {
     const grid = document.getElementById("certCameraPreviewGrid");
     if (!grid) return;
-    grid.innerHTML = STATE.certCameraImages.map((img, i) => `<div class="cert-cam-thumb"><img src="${img}" alt="Page ${i + 1}"/><span>Page ${i + 1}</span><button class="cert-cam-remove" onclick="removeCertPage(${i})">✕</button></div>`).join("");
+    grid.innerHTML = STATE.certCameraImages.map((img, i) => `
+        <div class="cert-cam-thumb">
+            <img src="${img}" alt="Page ${i + 1}"/>
+            <span>Page ${i + 1}</span>
+            <button class="cert-cam-remove" onclick="removeCertPage(${i})">✕</button>
+        </div>`).join("");
     const btn = document.getElementById("certConvertPDFBtn");
     if (btn) btn.style.display = STATE.certCameraImages.length > 0 ? "block" : "none";
 }
@@ -466,9 +878,12 @@ function removeCertPage(idx) {
 }
 
 async function convertCertImagesToPDF() {
-    if (STATE.certCameraImages.length === 0) { showToast("No pages captured", "error"); return; }
+    if (STATE.certCameraImages.length === 0) { 
+        showToast(t('noPagesCaptured', "No pages captured"), "error"); 
+        return; 
+    }
     const btn = document.getElementById("certConvertPDFBtn");
-    if (btn) { btn.textContent = "Converting…"; btn.disabled = true; }
+    if (btn) { btn.textContent = t('converting', "Converting…"); btn.disabled = true; }
     try {
         if (!window.jspdf && !window.jsPDF) await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
         const { jsPDF } = window.jspdf || window;
@@ -493,25 +908,43 @@ async function convertCertImagesToPDF() {
         document.getElementById("certFileSize").textContent = formatBytes(blob.size);
         switchCertMode("upload");
         setErr("front", "");
-        showToast("✅ Certificate PDF ready!", "success");
+        showToast(t('pdfReady'), "success");
     } catch (e) {
         console.error("[PDF]", e);
-        showToast("PDF conversion failed: " + e.message, "error");
+        showToast(t('pdfFailed', "PDF conversion failed: ") + e.message, "error");
     } finally {
-        if (btn) { btn.textContent = "✅ Convert to PDF"; btn.disabled = false; }
+        if (btn) { 
+            btn.innerHTML = `✅ ${t('convertPdf')}`; 
+            btn.disabled = false; 
+        }
     }
 }
 
 function loadImgEl(src) {
-    return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+    return new Promise((res, rej) => { 
+        const i = new Image(); 
+        i.onload = () => res(i); 
+        i.onerror = rej; 
+        i.src = src; 
+    });
 }
 
 function blobToDataURL(blob) {
-    return new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(blob); });
+    return new Promise(res => { 
+        const r = new FileReader(); 
+        r.onload = e => res(e.target.result); 
+        r.readAsDataURL(blob); 
+    });
 }
 
 function loadScript(src) {
-    return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+    return new Promise((res, rej) => { 
+        const s = document.createElement("script"); 
+        s.src = src; 
+        s.onload = res; 
+        s.onerror = rej; 
+        document.head.appendChild(s); 
+    });
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -523,19 +956,17 @@ function setDocType(type) {
     document.getElementById("btnCertificate").classList.toggle("active", type === "cert");
     document.getElementById("idCaptureZone").style.display = type === "id" ? "block" : "none";
     document.getElementById("certUploadZone").style.display = type === "cert" ? "block" : "none";
+    
+    // Update text based on language
+    updateDynamicContent();
+    
     if (type === "id") {
         document.getElementById("step2Icon").textContent = "🪪";
-        document.getElementById("step2Title").textContent = "Front ID Card";
-        document.getElementById("step2Desc").textContent = "Position your ID within the frame and capture a clear photo.";
-        document.getElementById("step2NextBtn").innerHTML = 'Next: Back ID <span class="btn-arrow">→</span>';
         STATE.cert = { file: null, b64: null, name: "", size: 0 };
         STATE.certCameraImages = [];
         if (!STATE.images.front) startCamera("Front");
     } else {
         document.getElementById("step2Icon").textContent = "📄";
-        document.getElementById("step2Title").textContent = "Replacement Certificate";
-        document.getElementById("step2Desc").textContent = "Upload the Icyemezo Gisimbura Indangamuntu issued to you.";
-        document.getElementById("step2NextBtn").innerHTML = 'Next: Take Selfie <span class="btn-arrow">→</span>';
         stopStream("Front");
         STATE.images.front = null;
         STATE.images.back = null;
@@ -549,8 +980,16 @@ function setDocType(type) {
 function handleCertUpload(input) {
     const file = input.files[0];
     if (!file) return;
-    if (file.type !== "application/pdf") { showToast("Only PDF files are accepted.", "error"); input.value = ""; return; }
-    if (file.size > CONFIG.MAX_PDF_MB * 1024 * 1024) { showToast(`PDF too large (max ${CONFIG.MAX_PDF_MB}MB).`, "error"); input.value = ""; return; }
+    if (file.type !== "application/pdf") { 
+        showToast(t('onlyPdf'), "error"); 
+        input.value = ""; 
+        return; 
+    }
+    if (file.size > CONFIG.MAX_PDF_MB * 1024 * 1024) { 
+        showToast(t('pdfTooLarge').replace('{n}', CONFIG.MAX_PDF_MB), "error"); 
+        input.value = ""; 
+        return; 
+    }
     const reader = new FileReader();
     reader.onload = (e) => {
         STATE.cert.b64 = e.target.result;
@@ -562,7 +1001,7 @@ function handleCertUpload(input) {
         document.getElementById("certFileName").textContent = file.name;
         document.getElementById("certFileSize").textContent = formatBytes(file.size);
         setErr("front", "");
-        showToast("Certificate uploaded ✓", "success");
+        showToast(t('uploadSuccess'), "success");
     };
     reader.readAsDataURL(file);
 }
@@ -582,7 +1021,13 @@ document.addEventListener("DOMContentLoaded", () => {
     zone.addEventListener("drop", e => {
         e.preventDefault(); zone.classList.remove("drag-over");
         const file = e.dataTransfer.files[0];
-        if (file) { const dt = new DataTransfer(); dt.items.add(file); const inp = document.getElementById("fileCert"); inp.files = dt.files; handleCertUpload(inp); }
+        if (file) { 
+            const dt = new DataTransfer(); 
+            dt.items.add(file); 
+            const inp = document.getElementById("fileCert"); 
+            inp.files = dt.files; 
+            handleCertUpload(inp); 
+        }
     });
 });
 
@@ -596,18 +1041,28 @@ function goStep(n) {
     const camMap = { 2: "Front", 3: "Back", 4: "Selfie" };
     const leaving = camMap[STATE.currentStep];
     const entering = camMap[n];
-    if (leaving && leaving !== entering) { stopAutoCapture(leaving); stopStream(leaving); }
+    if (leaving && leaving !== entering) { 
+        stopAutoCapture(leaving); 
+        stopStream(leaving); 
+    }
     STATE.currentStep = n;
     document.querySelectorAll(".step").forEach((s, i) => s.classList.toggle("active", i + 1 === n));
-    const totalVisible = STATE.docType === "cert" ? 4 : 5;
-    const displayStep = STATE.docType === "cert" && n >= 4 ? n - 1 : n;
-    document.getElementById("stepBadge").textContent = `Step ${displayStep} of ${totalVisible}`;
-    document.getElementById("progressFill").style.width = `${(displayStep / totalVisible) * 100}%`;
+    
+    // Update step badge with translation
+    updateErrorMessages();
+    
     const s4back = document.getElementById("step4BackBtn");
     if (s4back) s4back.setAttribute("onclick", `goStep(${STATE.docType === "cert" ? 2 : 3})`);
-    if (n === 2 && STATE.docType === "id") { startCamera("Front").then(() => setTimeout(() => startAutoCapture("Front"), 800)); }
-    if (n === 3) { startCamera("Back").then(() => setTimeout(() => startAutoCapture("Back"), 800)); }
-    if (n === 4) { startCamera("Selfie").then(() => setTimeout(() => startAutoCapture("Selfie"), 800)); }
+    
+    if (n === 2 && STATE.docType === "id") { 
+        startCamera("Front").then(() => setTimeout(() => startAutoCapture("Front"), 800)); 
+    }
+    if (n === 3) { 
+        startCamera("Back").then(() => setTimeout(() => startAutoCapture("Back"), 800)); 
+    }
+    if (n === 4) { 
+        startCamera("Selfie").then(() => setTimeout(() => startAutoCapture("Selfie"), 800)); 
+    }
     if (n === 5) populateReview();
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -629,32 +1084,32 @@ function validateCurrentStep() {
 function validateStep1() {
     let ok = true;
     const fn = v("firstName"), ln = v("lastName"), id = v("idNumber"), ph = v("phoneNumber"), ms = v("msisdn"), di = v("district");
-    if (!fn) { setErr("firstName", "First name is required"); ok = false; }
-    if (!ln) { setErr("lastName", "Last name is required"); ok = false; }
-    if (!STATE.gender) { setErr("gender", "Please select your gender"); ok = false; }
-    if (!id || id.replace(/\s/g, "").length < 10) { setErr("idNumber", "Enter a valid ID number (≥ 10 digits)"); ok = false; }
-    if (!ph || !/^07\d{8}$/.test(ph)) { setErr("phoneNumber", "Enter a valid Rwandan phone number (07XXXXXXXX)"); ok = false; }
-    if (!ms || !/^07\d{8}$/.test(ms)) { setErr("msisdn", "Enter a valid MSISDN (07XXXXXXXX)"); ok = false; }
-    if (!di) { setErr("district", "Please select a district"); ok = false; }
+    if (!fn) { setErr("firstName", t('firstName') + " " + (STATE.currentLang === 'rw' ? "ngomba kuzuzwa" : "is required")); ok = false; }
+    if (!ln) { setErr("lastName", t('lastName') + " " + (STATE.currentLang === 'rw' ? "ngomba kuzuzwa" : "is required")); ok = false; }
+    if (!STATE.gender) { setErr("gender", t('genderError')); ok = false; }
+    if (!id || id.replace(/\s/g, "").length < 10) { setErr("idNumber", t('idNumberError')); ok = false; }
+    if (!ph || !/^07\d{8}$/.test(ph)) { setErr("phoneNumber", t('phoneError')); ok = false; }
+    if (!ms || !/^07\d{8}$/.test(ms)) { setErr("msisdn", t('msisdnError')); ok = false; }
+    if (!di) { setErr("district", t('districtError')); ok = false; }
     return ok;
 }
 
 function validateStep2() {
     if (STATE.docType === "id") {
-        if (!STATE.images.front) { setErr("front","Please capture or upload the front of your ID card."); return false; }
+        if (!STATE.images.front) { setErr("front", t('frontIdError')); return false; }
     } else {
-        if (!STATE.cert.b64) { setErr("front","Please upload your replacement certificate (PDF)."); return false; }
+        if (!STATE.cert.b64) { setErr("front", t('certRequired', "Please upload your replacement certificate (PDF).")); return false; }
     }
     return true;
 }
 
 function validateStep3() {
-    if (!STATE.images.back) { setErr("back","Please capture or upload the back of your ID card."); return false; }
+    if (!STATE.images.back) { setErr("back", t('backIdError')); return false; }
     return true;
 }
 
 function validateStep4() {
-    if (!STATE.images.selfie) { setErr("selfie","Please take a selfie."); return false; }
+    if (!STATE.images.selfie) { setErr("selfie", t('selfieError')); return false; }
     return true;
 }
 
@@ -666,6 +1121,14 @@ async function startCamera(side) {
     if (!video) return;
     if (STATE.images[side.toLowerCase()]) return;
     if (STATE.streams[side]) stopStream(side);
+    
+    // Apply mirror class for selfie
+    if (side === "Selfie") {
+        video.classList.add("mirror-video");
+    } else {
+        video.classList.remove("mirror-video");
+    }
+    
     const facingMode = STATE.facingModes[side] || (side === "Selfie" ? "user" : "environment");
     try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -675,10 +1138,13 @@ async function startCamera(side) {
         STATE.streams[side] = stream;
         video.srcObject = stream;
         const btn = document.getElementById(`switchCameraBtn${side}`);
-        if (btn) btn.textContent = facingMode === "user" ? "🔄 Back Cam" : "🔄 Front Cam";
+        if (btn) {
+            const isBack = facingMode === "environment";
+            btn.textContent = isBack ? t('backCam') : t('frontCam');
+        }
     } catch (err) {
         console.warn("[CAM]", err);
-        showToast("Camera unavailable — please upload a file instead.", "error");
+        showToast(t('cameraUnavailable'), "error");
         const frame = document.getElementById(`cameraFrame${side}`);
         if (frame) frame.style.display = "none";
     }
@@ -694,11 +1160,17 @@ function stopStream(side) {
 function capturePhoto(side) {
     const video = document.getElementById(`video${side}`);
     const canvas = document.getElementById(`canvas${side}`);
-    if (!video || !video.videoWidth) { showToast("Camera not ready. Try uploading instead.", "error"); return; }
+    if (!video || !video.videoWidth) { 
+        showToast(t('cameraNotReady', "Camera not ready. Try uploading instead."), "error"); 
+        return; 
+    }
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const ctx = canvas.getContext("2d");
-    if (side === "Selfie") { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
+    if (side === "Selfie") { 
+        ctx.translate(canvas.width, 0); 
+        ctx.scale(-1, 1); 
+    }
     ctx.drawImage(video, 0, 0);
     const dataURL = (side === "Front" || side === "Back") ? cropToIDOverlay(canvas) : canvas.toDataURL("image/jpeg", CONFIG.IMAGE_QUALITY);
     stopAutoCapture(side);
@@ -715,11 +1187,16 @@ function retake(side) {
     const frame = document.getElementById(`cameraFrame${side}`);
     if (frame) frame.style.display = "block";
     const fb = document.getElementById(`feedback${side}`);
-    if (fb) { fb.textContent = "Align and hold steady…"; fb.className = "capture-feedback feedback-orange"; }
+    if (fb) { 
+        fb.textContent = t('alignId'); 
+        fb.className = "capture-feedback feedback-orange"; 
+    }
     const pb = document.getElementById(`captureProgress${side}`);
-    if (pb) { pb.style.width = "0%"; pb.className = "capture-progress-fill progress-wait"; }
+    if (pb) { 
+        pb.style.width = "0%"; 
+        pb.className = "capture-progress-fill progress-wait"; 
+    }
     setErr(side.toLowerCase(), "");
-    // Toggle buttons
     document.getElementById(`btnRow${side}Camera`).style.display = "flex";
     document.getElementById(`btnRow${side}Preview`).style.display = "none";
     startCamera(side).then(() => setTimeout(() => startAutoCapture(side), 800));
@@ -732,8 +1209,7 @@ function saveImage(side, dataURL) {
     const frame = document.getElementById(`cameraFrame${side}`);
     if (frame) frame.style.display = "none";
     setErr(side.toLowerCase(), "");
-    showToast(`${side} captured ✓`, "success");
-    // Toggle buttons - show preview buttons with Next
+    showToast(`${side} ${t('captured', "captured")} ✓`, "success");
     document.getElementById(`btnRow${side}Camera`).style.display = "none";
     document.getElementById(`btnRow${side}Preview`).style.display = "flex";
 }
@@ -741,8 +1217,16 @@ function saveImage(side, dataURL) {
 function handleFileUpload(side, input) {
     const file = input.files[0];
     if (!file) return;
-    if (file.size > CONFIG.MAX_IMAGE_MB * 1024 * 1024) { showToast(`File too large (max ${CONFIG.MAX_IMAGE_MB}MB)`, "error"); input.value = ""; return; }
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) { showToast("Only JPG, PNG, or WebP allowed.", "error"); input.value = ""; return; }
+    if (file.size > CONFIG.MAX_IMAGE_MB * 1024 * 1024) { 
+        showToast(t('fileTooLarge').replace('{n}', CONFIG.MAX_IMAGE_MB), "error"); 
+        input.value = ""; 
+        return; 
+    }
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) { 
+        showToast(t('invalidFile'), "error"); 
+        input.value = ""; 
+        return; 
+    }
     const reader = new FileReader();
     reader.onload = e => {
         saveImage(side, e.target.result);
@@ -761,7 +1245,8 @@ function populateReview() {
     document.getElementById("rv-phone").textContent = v("phoneNumber");
     document.getElementById("rv-msisdn").textContent = v("msisdn");
     document.getElementById("rv-district").textContent = v("district");
-    document.getElementById("rv-doctype").textContent = STATE.docType === "cert" ? "Replacement Certificate (PDF)" : "National ID Card";
+    document.getElementById("rv-doctype").textContent = STATE.docType === "cert" ? 
+        t('replacementCert') + " (PDF)" : t('nationalId');
     if (STATE.docType === "id") {
         document.getElementById("rv-id-images").style.display = "grid";
         document.getElementById("rv-cert-images").style.display = "none";
@@ -784,10 +1269,10 @@ async function submitKYC() {
     const label = document.getElementById("submitLabel");
     const spinner = document.getElementById("submitSpinner");
     btn.disabled = true;
-    label.textContent = "Preparing…";
+    label.textContent = t('preparing');
     spinner.classList.remove("hidden");
     try {
-        label.textContent = "Compressing images…";
+        label.textContent = t('compressing');
         let frontB64Raw, backB64Raw, selfieB64Raw, isPdf;
         if (STATE.docType === "cert") {
             frontB64Raw = stripPrefix(STATE.cert.b64);
@@ -800,7 +1285,7 @@ async function submitKYC() {
             selfieB64Raw = await compressImage(STATE.images.selfie, CONFIG.SELFIE_MAX_PX, CONFIG.UPLOAD_QUALITY);
             isPdf = false;
         }
-        label.textContent = "AI Verification…";
+        label.textContent = t('aiVerification');
         const fastApiPayload = {
             first_name: v("firstName"),
             last_name: v("lastName"),
@@ -814,27 +1299,32 @@ async function submitKYC() {
             back_image: backB64Raw,
             selfie: selfieB64Raw,
             front_is_pdf: isPdf,
+            lang: STATE.currentLang,
         };
         const result = await callFastAPI(fastApiPayload);
         if (result.status === "approved") {
-            label.textContent = "Saving to Drive & Sheet…";
+            label.textContent = t('saving');
             const saved = await callAppsScript({ ...fastApiPayload, validation: result });
-            if (!saved) showToast("⚠ Approved but data sync failed — contact support.", "error");
-            else showToast("✅ Data saved to Drive & Sheet", "success");
+            if (!saved) showToast(t('syncWarning'), "error");
+            else showToast(t('approvedToast'), "success");
         }
         showResult(result);
     } catch (err) {
         console.error(err);
-        showToast("Submission failed: " + err.message, "error");
+        showToast(t('submissionFailed').replace('{msg}', err.message), "error");
     } finally {
         btn.disabled = false;
-        label.textContent = "Submit for Verification";
+        label.textContent = t('submitVerification');
         spinner.classList.add("hidden");
     }
 }
 
 async function callFastAPI(payload) {
-    const res = await fetch(CONFIG.FASTAPI_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    const res = await fetch(CONFIG.FASTAPI_URL, { 
+        method: "POST", 
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify(payload) 
+    });
     if (!res.ok) throw new Error(`FastAPI error ${res.status}: ${await res.text()}`);
     return res.json();
 }
@@ -848,18 +1338,29 @@ function callAppsScript(payload) {
             iframe.style.cssText = "display:none;width:0;height:0;border:0;position:absolute;left:-9999px;";
             document.body.appendChild(iframe);
             const form = document.createElement("form");
-            form.method = "POST"; form.action = CONFIG.APPS_SCRIPT_URL;
-            form.target = iframeName; form.enctype = "application/x-www-form-urlencoded";
+            form.method = "POST"; 
+            form.action = CONFIG.APPS_SCRIPT_URL;
+            form.target = iframeName; 
+            form.enctype = "application/x-www-form-urlencoded";
             form.style.cssText = "display:none;position:absolute;left:-9999px;";
             const inp = document.createElement("input");
-            inp.type = "hidden"; inp.name = "payload"; inp.value = JSON.stringify(payload);
-            form.appendChild(inp); document.body.appendChild(form);
-            const cleanup = () => { try { document.body.removeChild(form); } catch(_) {} try { document.body.removeChild(iframe); } catch(_) {} };
+            inp.type = "hidden"; 
+            inp.name = "payload"; 
+            inp.value = JSON.stringify(payload);
+            form.appendChild(inp); 
+            document.body.appendChild(form);
+            const cleanup = () => { 
+                try { document.body.removeChild(form); } catch(_) {} 
+                try { document.body.removeChild(iframe); } catch(_) {} 
+            };
             const timeout = setTimeout(() => { cleanup(); resolve(true); }, 15000);
             iframe.onload = () => { clearTimeout(timeout); cleanup(); resolve(true); };
             iframe.onerror = () => { clearTimeout(timeout); cleanup(); resolve(true); };
             form.submit();
-        } catch (err) { console.error("[Apps Script] ", err); resolve(false); }
+        } catch (err) { 
+            console.error("[Apps Script] ", err); 
+            resolve(false); 
+        }
     });
 }
 
@@ -872,25 +1373,43 @@ function showResult(result) {
     const pct = Math.round((result.score || 0) * 100);
     let issuesHTML = "";
     if (!ok && result.issues?.length) {
-        issuesHTML = `<div class="result-issues"><h4>Issues Found</h4><ul>${result.issues.map(i => `<li>${i}</li>`).join("")}</ul></div>`;
+        issuesHTML = `
+            <div class="result-issues">
+                <h4>${t('issuesFound')}</h4>
+                <ul>${result.issues.map(i => `<li>${i}</li>`).join("")}</ul>
+            </div>`;
     }
-    document.getElementById("resultContainer").innerHTML = `<div class="result-icon">${ok ? "✅" : "❌"}</div><div class="result-title ${ok ? "approved" : "rejected"}">${ok ? "Verification Approved!" : "Verification Failed"}</div><div class="result-score">Confidence Score: <span class="score-value">${pct}%</span></div>${issuesHTML}<div class="result-meta">${ok ? "Your data has been securely saved. You will receive confirmation shortly." : "Please correct the issues above and try again."}</div><div class="result-actions">${!ok ? `<button class="btn-secondary" onclick="goStep(1)">↺ Try Again</button>` : ""}<button class="btn-restart" onclick="restartFull()">Start New Registration</button></div>`;
+    document.getElementById("resultContainer").innerHTML = `
+        <div class="result-icon">${ok ? "✅" : "❌"}</div>
+        <div class="result-title ${ok ? "approved" : "rejected"}">${ok ? t('approved') : t('rejected')}</div>
+        <div class="result-score">${t('confidenceScore')} <span class="score-value">${pct}%</span></div>
+        ${issuesHTML}
+        <div class="result-meta">${ok ? t('approvedMessage') : t('rejectedMessage')}</div>
+        <div class="result-actions">
+            ${!ok ? `<button class="btn-secondary" onclick="goStep(1)">${t('tryAgain')}</button>` : ""}
+            <button class="btn-restart" onclick="restartFull()">${t('startNew')}</button>
+        </div>`;
 }
 
 function goStepDirect(n) {
     STATE.currentStep = n;
     document.querySelectorAll(".step").forEach((s, i) => s.classList.toggle("active", i + 1 === n));
-    document.getElementById("stepBadge").textContent = n <= 5 ? `Step ${n} of 5` : "Complete";
+    document.getElementById("stepBadge").textContent = n <= 5 ? 
+        t('stepBadge').replace('{current}', n).replace('{total}', 5) : 
+        t('complete');
     document.getElementById("progressFill").style.width = "100%";
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function restartFull() {
-    ["Front", "Back", "Selfie", "Cert"].forEach(s => { stopAutoCapture(s); stopStream(s); });
+    ["Front", "Back", "Selfie", "Cert"].forEach(s => { 
+        stopAutoCapture(s); 
+        stopStream(s); 
+    });
     STATE.images = { front: null, back: null, selfie: null };
     STATE.cert = { file: null, b64: null, name: "", size: 0 };
     STATE.certCameraImages = [];
-    STATE.gender = null;  // NO DEFAULT
+    STATE.gender = null;
     STATE.docType = "id";
     STATE.autoCapture.lastFrame = {};
     STATE.autoCapture.goodSince = {};
@@ -906,10 +1425,22 @@ function restartFull() {
 // ══════════════════════════════════════════════════════════════
 //  HELPERS
 // ══════════════════════════════════════════════════════════════
-function v(id) { const el = document.getElementById(id); return el ? el.value.trim() : ""; }
-function setErr(field, msg) { const el = document.getElementById(`err-${field}`); if (el) el.textContent = msg; }
-function clearErrors() { document.querySelectorAll(".err").forEach(e => (e.textContent = "")); }
-function formatBytes(b) { if (b < 1024) return b + " B"; if (b < 1048576) return (b/1024).toFixed(1)+ " KB"; return (b/1048576).toFixed(2)+ " MB"; }
+function v(id) { 
+    const el = document.getElementById(id); 
+    return el ? el.value.trim() : ""; 
+}
+function setErr(field, msg) { 
+    const el = document.getElementById(`err-${field}`); 
+    if (el) el.textContent = msg; 
+}
+function clearErrors() { 
+    document.querySelectorAll(".err").forEach(e => (e.textContent = "")); 
+}
+function formatBytes(b) { 
+    if (b < 1024) return b + " B"; 
+    if (b < 1048576) return (b/1024).toFixed(1)+ " KB"; 
+    return (b/1048576).toFixed(2)+ " MB"; 
+}
 function showToast(msg, type = "") {
     const t = document.getElementById("toast");
     t.textContent = msg;
@@ -921,7 +1452,10 @@ function showToast(msg, type = "") {
 //  EVENT LISTENERS
 // ══════════════════════════════════════════════════════════════
 document.addEventListener("DOMContentLoaded", () => {
-    // Gender toggle - NO DEFAULT SELECTION
+    // Initialize language
+    updatePageLanguage();
+    
+    // Gender toggle
     document.querySelectorAll(".toggle-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             document.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
@@ -935,8 +1469,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const msisdnInput = document.getElementById("msisdn");
     const phoneInput = document.getElementById("phoneNumber");
     function syncMsisdn() {
-        if (sameCheck.checked) { msisdnInput.value = phoneInput.value; msisdnInput.disabled = true; }
-        else { msisdnInput.disabled = false; }
+        if (sameCheck.checked) { 
+            msisdnInput.value = phoneInput.value; 
+            msisdnInput.disabled = true; 
+        }
+        else { 
+            msisdnInput.disabled = false; 
+        }
     }
     sameCheck.addEventListener("change", syncMsisdn);
     phoneInput.addEventListener("input", syncMsisdn);
